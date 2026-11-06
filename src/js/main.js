@@ -1,5 +1,5 @@
 import { getSecondRoundEligibility } from "./election.js";
-import { simulateStateResults, BRAZIL_STATE_TILES } from "./state-results.js";
+import { simulateStateResults } from "./state-results.js";
 import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
 (() => {
   "use strict";
@@ -51,6 +51,7 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
   };
 
   const $ = id => document.getElementById(id);
+  let stateMapGeoPromise = null;
   const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({
     "&": "&amp;",
     "<": "&lt;",
@@ -536,40 +537,136 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
     showView("counting");
   });
 
-  function renderStateMap() {
-    const grid = $("stateCartogram");
+  async function renderStateMap() {
+    const map = $("stateCartogram");
     const legend = $("stateMapLegend");
-    if (!grid || !legend) return;
-    if (!state.stateMapResults.length) {
-      grid.innerHTML = "";
-      legend.innerHTML = '<span class="empty">Finalize a apuração presidencial para gerar o mapa.</span>';
+    if (!map || !legend) return;
+
+    if (!stateMapGeoPromise) {
+      stateMapGeoPromise = fetch("https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/brazil-states.geojson")
+        .then(response => {
+          if (!response.ok) throw new Error("Não foi possível carregar os limites estaduais.");
+          return response.json();
+        });
+    }
+
+    let geo;
+    try {
+      geo = await stateMapGeoPromise;
+    } catch (error) {
+      map.innerHTML = '<p class="empty">Não foi possível carregar o mapa geográfico. Verifique sua conexão e tente atualizar a página.</p>';
+      legend.innerHTML = '<span class="empty">Mapa indisponível no momento.</span>';
       return;
     }
+
+    const ufByName = new Map([
+      ["acre","AC"],["alagoas","AL"],["amapa","AP"],["amazonas","AM"],
+      ["bahia","BA"],["ceara","CE"],["distrito federal","DF"],["espirito santo","ES"],
+      ["goias","GO"],["maranhao","MA"],["mato grosso","MT"],["mato grosso do sul","MS"],
+      ["minas gerais","MG"],["para","PA"],["paraiba","PB"],["parana","PR"],
+      ["pernambuco","PE"],["piaui","PI"],["rio de janeiro","RJ"],
+      ["rio grande do norte","RN"],["rio grande do sul","RS"],["rondonia","RO"],
+      ["roraima","RR"],["santa catarina","SC"],["sao paulo","SP"],
+      ["sergipe","SE"],["tocantins","TO"]
+    ]);
+    const normalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const resultByUF = new Map(state.stateMapResults.map(result => [result.uf, result]));
+    const features = (geo.features || []).map(feature => {
+      const props = feature.properties || {};
+      const name = props.name || props.NAME_1 || props.name_en || "";
+      return { feature, name, uf: ufByName.get(normalize(name)) };
+    }).filter(item => item.uf && item.feature.geometry);
+
+    if (features.length < 27) {
+      map.innerHTML = '<p class="empty">A fonte geográfica não retornou todas as 27 unidades federativas.</p>';
+      legend.innerHTML = '<span class="empty">Mapa incompleto.</span>';
+      return;
+    }
+
+    const getPolygons = geometry => geometry.type === "Polygon"
+      ? [geometry.coordinates]
+      : geometry.type === "MultiPolygon" ? geometry.coordinates : [];
+
+    const rawPoints = [];
+    features.forEach(({feature}) => getPolygons(feature.geometry).forEach(polygon => {
+      (polygon[0] || []).forEach(point => rawPoints.push(point));
+    }));
+    const lat0 = -14;
+    const project = ([lon, lat]) => [lon * Math.cos(lat0 * Math.PI / 180), lat];
+    const projected = rawPoints.map(project);
+    const minX = Math.min(...projected.map(point => point[0]));
+    const maxX = Math.max(...projected.map(point => point[0]));
+    const minY = Math.min(...projected.map(point => point[1]));
+    const maxY = Math.max(...projected.map(point => point[1]));
+    const width = 760, height = 720, padding = 18;
+    const scale = Math.min((width - padding * 2) / (maxX - minX), (height - padding * 2) / (maxY - minY));
+    const offsetX = (width - (maxX - minX) * scale) / 2;
+    const offsetY = (height - (maxY - minY) * scale) / 2;
+    const toScreen = point => {
+      const [x,y] = project(point);
+      return [offsetX + (x - minX) * scale, height - offsetY - (y - minY) * scale];
+    };
+    const ringPath = ring => ring.map((point,index) => {
+      const [x,y] = toScreen(point);
+      return (index ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1);
+    }).join(" ") + " Z";
+    const pathFor = geometry => getPolygons(geometry).map(polygon =>
+      polygon.map(ringPath).join(" ")
+    ).join(" ");
+
+    const pathMarkup = features.map(({feature,name,uf}) => {
+      const result = resultByUF.get(uf);
+      const winner = result && result.votes[0];
+      const fill = winner ? winner.color : "#34445f";
+      const labelPoints = getPolygons(feature.geometry).flatMap(polygon => polygon[0] || []);
+      const average = labelPoints.reduce((sum,point) => {
+        const p = toScreen(point); sum[0] += p[0]; sum[1] += p[1]; return sum;
+      },[0,0]);
+      const center = labelPoints.length ? [average[0]/labelPoints.length,average[1]/labelPoints.length] : [0,0];
+      const label = '<text class="state-map-label" x="' + center[0].toFixed(1) + '" y="' + center[1].toFixed(1) + '">' + uf + '</text>';
+      return '<path class="state-map-shape' + (result ? ' is-result' : '') + '" d="' + pathFor(feature.geometry) +
+        '" fill="' + fill + '" data-state-uf="' + uf + '" data-state-name="' + escapeHtml(name) +
+        '" tabindex="' + (result ? "0" : "-1") + '" role="' + (result ? "button" : "img") +
+        '" aria-label="' + escapeHtml(name) + (winner ? ': ' + escapeHtml(winner.name) + ' venceu' : '') + '"></path>' + label;
+    }).join("");
+
+    map.innerHTML = '<svg class="brazil-state-svg" viewBox="0 0 ' + width + ' ' + height +
+      '" role="group" aria-label="Mapa do Brasil dividido em 26 estados e Distrito Federal">' + pathMarkup + '</svg>';
+
+    if (!state.stateMapResults.length) {
+      legend.innerHTML = '<span class="empty">Finalize a apuração presidencial para colorir os estados por vencedor.</span>';
+      $("stateDetail").innerHTML = '<p class="empty">Depois da apuração, clique em um estado para consultar os votos simulados.</p>';
+      return;
+    }
+
     const winners = [...new Map(state.stateMapResults.map(item => [item.winnerId, item.votes[0]])).values()];
     legend.innerHTML = winners.map(candidate =>
       '<span class="map-legend-item"><i style="background:' + candidate.color + '"></i>' +
       escapeHtml(candidate.name) + ' (' + escapeHtml(candidate.partyAcronym) + ')</span>'
     ).join("");
-    grid.innerHTML = state.stateMapResults.map(result => {
-      const winner = result.votes[0];
-      const tile = BRAZIL_STATE_TILES.find(item => item.uf === result.uf);
-      return '<button class="state-tile" style="--state-color:' + winner.color +
-        ';grid-column:' + tile.col + ';grid-row:' + tile.row +
-        '" data-state-uf="' + result.uf + '" aria-label="' + escapeHtml(result.name) +
-        ': ' + escapeHtml(winner.name) + ' venceu">' +
-        '<strong>' + result.uf + '</strong><small>' + escapeHtml(result.name) + '</small></button>';
-    }).join("");
-    grid.querySelectorAll("[data-state-uf]").forEach(button => {
-      button.addEventListener("click", () => {
-        const result = state.stateMapResults.find(item => item.uf === button.dataset.stateUf);
-        if (!result) return;
-        $("stateDetail").innerHTML = '<h3>' + escapeHtml(result.name) + ' (' + result.uf +
-          ')</h3>' + result.votes.map(candidate =>
-            '<div class="state-result-row"><span><i style="background:' + candidate.color +
-            '"></i>' + escapeHtml(candidate.name) + ' · ' + escapeHtml(candidate.partyAcronym) +
-            '</span><strong>' + candidate.votes.toLocaleString("pt-BR") + ' · ' +
-            candidate.percent.toFixed(1).replace(".", ",") + '%</strong></div>'
-          ).join("");
+
+    const showState = uf => {
+      const result = resultByUF.get(uf);
+      if (!result) return;
+      $("stateDetail").innerHTML = '<h3>' + escapeHtml(result.name) + ' (' + result.uf +
+        ')</h3><p class="state-detail-total">' + result.totalVotes.toLocaleString("pt-BR") +
+        ' votos simulados</p>' + result.votes.map(candidate =>
+          '<div class="state-result-row"><span><i style="background:' + candidate.color +
+          '"></i>' + escapeHtml(candidate.name) + ' · ' + escapeHtml(candidate.partyAcronym) +
+          '</span><strong>' + candidate.votes.toLocaleString("pt-BR") + ' · ' +
+          candidate.percent.toFixed(1).replace(".", ",") + '%</strong></div>'
+        ).join("");
+      map.querySelectorAll("[data-state-uf]").forEach(path => {
+        path.classList.toggle("is-selected", path.dataset.stateUf === uf);
+      });
+    };
+    map.querySelectorAll(".state-map-shape.is-result").forEach(shape => {
+      shape.addEventListener("click", () => showState(shape.dataset.stateUf));
+      shape.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          showState(shape.dataset.stateUf);
+        }
       });
     });
   }

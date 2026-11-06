@@ -41,6 +41,6 @@ export function allocateVotes(total, weights) {
 }
 
 export function getSecondRoundEligibility(type, electorate) {
-  return type === "presidencial" ||
+  return type === "presidencial" || type === "governador" ||
     (type === "municipal" && electorate > 200000);
 }

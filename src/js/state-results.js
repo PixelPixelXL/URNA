@@ -7,7 +7,6 @@ const STATES = [
   ["PR","Paraná",5,7],["SC","Santa Catarina",4,7],["RS","Rio Grande do Sul",3,7]
 ];
 
-export const BRAZIL_STATE_TILES = STATES.map(([uf,name,col,row]) => ({uf,name,col,row}));
 
 function allocate(total, weights) {
   const sum = weights.reduce((a,b)=>a+b,0);

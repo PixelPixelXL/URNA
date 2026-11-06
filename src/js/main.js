@@ -1,5 +1,6 @@
 import { getSecondRoundEligibility } from "./election.js";
 import { simulateStateResults, BRAZIL_STATE_TILES } from "./state-results.js";
+import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
 (() => {
   "use strict";
 
@@ -127,7 +128,7 @@ import { simulateStateResults, BRAZIL_STATE_TILES } from "./state-results.js";
       const placeLabel = $("placeLabel");
       if (placeLabel) placeLabel.firstChild.textContent = input.value === "governador" ? "Estado da disputa" : input.value === "municipal" ? "Nome da cidade" : "Nome do país";
       const note = $("candidateContextNote");
-      if (note) note.textContent = input.value === "governador" ? "Modo governador: os candidatos cadastrados após salvar a configuração disputarão o governo do estado informado. Os resultados são fictícios." : input.value === "municipal" ? "Modo municipal: cadastre os candidatos da cidade escolhida. O catálogo presidencial não será reutilizado." : "Participantes pré-carregados para a simulação presidencial de 2026. Esta seleção é para o jogo, não uma confirmação de candidaturas oficialmente registradas."; 
+      if (note) note.textContent = input.value === "governador" ? "Modo governador: o catálogo de 2026 carrega automaticamente os candidatos de GO, MT, MS ou DF. Você pode editar a lista e adicionar candidatos próprios. Os resultados são fictícios." : input.value === "municipal" ? "Modo municipal: cadastre os candidatos da cidade escolhida. O catálogo presidencial não será reutilizado." : "Participantes pré-carregados para a simulação presidencial de 2026. Esta seleção é para o jogo, não uma confirmação de candidaturas oficialmente registradas."; 
     });
   });
 
@@ -173,6 +174,17 @@ import { simulateStateResults, BRAZIL_STATE_TILES } from "./state-results.js";
     if (state.catalogMode) {
       if (state.type === "presidencial" && state.year === 2026) {
         loadPresidential2026Preset();
+      } else if (state.type === "governador" && state.year === 2026) {
+        const governorCatalog = getGovernorCandidates2026(state.place);
+        if (governorCatalog) {
+          state.place = governorCatalog.uf;
+          state.parties = governorCatalog.parties;
+          state.candidates = governorCatalog.candidates;
+        } else {
+          state.parties = [];
+          state.candidates = [];
+          toast("Catálogo automático disponível para GO, MT, MS e DF. Informe a UF ou o nome do estado.");
+        }
       } else {
         // Catálogos estaduais e municipais são específicos da região escolhida.
         state.parties = [];

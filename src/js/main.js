@@ -185,8 +185,11 @@ import { simulateStateResults, BRAZIL_STATE_TILES } from "./state-results.js";
     $("runDebate").textContent = "Iniciar rodada de debate →";
     state.roundCandidates = null;
     state.firstRoundResults = null;
+    state.stateMapResults = [];
+    renderStateMap();
     resetCounting(true);
-    $("setupMessage").textContent = "Eleição " + (state.type === "municipal" ? "municipal" : "presidencial") +
+    const electionLabel = state.type === "municipal" ? "municipal" : state.type === "governador" ? "para governador" : "presidencial";
+    $("setupMessage").textContent = "Eleição " + electionLabel +
       " configurada para " + state.place + ", " + state.year + ". Tudo pronto para montar a disputa.";
     $("countingTitle").textContent = "Eleição de " + state.year + " · " + state.place;
     $("countingSubtitle").textContent = state.electorate.toLocaleString("pt-BR") +

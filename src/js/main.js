@@ -543,7 +543,7 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
     if (!map || !legend) return;
 
     if (!stateMapGeoPromise) {
-      stateMapGeoPromise = fetch("https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/brazil-states.geojson")
+      stateMapGeoPromise = fetch("https://raw.githubusercontent.com/codeforgermany/click_that_hood/48ba05ad4c6969e3b3c25735492169227ae411f1/public/data/brazil-states.geojson")
         .then(response => {
           if (!response.ok) throw new Error("Não foi possível carregar os limites estaduais.");
           return response.json();

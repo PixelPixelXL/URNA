@@ -1,4 +1,5 @@
 import { getSecondRoundEligibility } from "./election.js";
+import { simulateStateResults, BRAZIL_STATE_TILES } from "./state-results.js";
 (() => {
   "use strict";
 
@@ -44,7 +45,8 @@ import { getSecondRoundEligibility } from "./election.js";
     catalogMode: true,
     round: 1,
     roundCandidates: null,
-    firstRoundResults: null
+    firstRoundResults: null,
+    stateMapResults: []
   };
 
   const $ = id => document.getElementById(id);
@@ -122,6 +124,10 @@ import { getSecondRoundEligibility } from "./election.js";
       state.type = input.value;
       const choiceRow = document.querySelector(".choice-row");
       if (choiceRow) choiceRow.setAttribute("aria-label", input.value);
+      const placeLabel = $("placeLabel");
+      if (placeLabel) placeLabel.firstChild.textContent = input.value === "governador" ? "Estado da disputa" : input.value === "municipal" ? "Nome da cidade" : "Nome do país";
+      const note = $("candidateContextNote");
+      if (note) note.textContent = input.value === "governador" ? "Modo governador: os candidatos cadastrados após salvar a configuração disputarão o governo do estado informado. Os resultados são fictícios." : input.value === "municipal" ? "Modo municipal: cadastre os candidatos da cidade escolhida. O catálogo presidencial não será reutilizado." : "Participantes pré-carregados para a simulação presidencial de 2026. Esta seleção é para o jogo, não uma confirmação de candidaturas oficialmente registradas."; 
     });
   });
 
@@ -168,7 +174,7 @@ import { getSecondRoundEligibility } from "./election.js";
       if (state.type === "presidencial" && state.year === 2026) {
         loadPresidential2026Preset();
       } else {
-        // O catálogo municipal é específico de cada cidade; não reutilize nomes presidenciais.
+        // Catálogos estaduais e municipais são específicos da região escolhida.
         state.parties = [];
         state.candidates = [];
       }
@@ -244,6 +250,8 @@ import { getSecondRoundEligibility } from "./election.js";
       id: crypto.randomUUID(),
       name,
       partyId,
+      office: state.type === "governador" ? "governor" : state.type === "presidencial" ? "president" : "mayor",
+      region: state.type === "presidencial" ? "Brasil" : state.place,
       platform: $("candidatePlatform").value.trim() || "Sem propostas específicas."
     });
     $("candidateName").value = "";
@@ -282,6 +290,7 @@ import { getSecondRoundEligibility } from "./election.js";
             escapeHtml(c.name) + "</strong><small>" +
             (c.ballotNumber ? "Nº " + escapeHtml(c.ballotNumber) + " · " : "") +
             escapeHtml(party ? party.acronym + " · " + party.name : "Sem partido") +
+            (c.office === "governor" ? " · Governador · " + escapeHtml(c.region) : c.office === "mayor" ? " · Prefeito · " + escapeHtml(c.region) : "") +
             " · Proposta: " + escapeHtml(c.platform) +
             '</small></div><button class="remove-btn" data-remove-candidate="' + c.id + '">Excluir</button></div>';
         }).join("")
@@ -374,8 +383,8 @@ import { getSecondRoundEligibility } from "./election.js";
   });
 
   $("startCount").addEventListener("click", () => {
-    if (state.candidates.length < 2) {
-      toast("Cadastre pelo menos dois candidatos antes da apuração.");
+    if (getRoundCandidates().length < 2) {
+      toast("Cadastre pelo menos dois candidatos para esta disputa antes da apuração.");
       showView("people");
       return;
     }
@@ -449,7 +458,16 @@ import { getSecondRoundEligibility } from "./election.js";
   $("resetCount").addEventListener("click", () => resetCounting(false));
 
   function getRoundCandidates() {
-    return state.roundCandidates || state.candidates;
+    if (state.roundCandidates) return state.roundCandidates;
+    if (state.type === "governador") {
+      return state.candidates.filter(candidate => candidate.office === "governor" &&
+        String(candidate.region || "").toLocaleLowerCase("pt-BR") === state.place.toLocaleLowerCase("pt-BR"));
+    }
+    if (state.type === "municipal") {
+      return state.candidates.filter(candidate => candidate.office === "mayor" &&
+        String(candidate.region || "").toLocaleLowerCase("pt-BR") === state.place.toLocaleLowerCase("pt-BR"));
+    }
+    return state.candidates.filter(candidate => candidate.office !== "governor" && candidate.office !== "mayor");
   }
 
   function finishRound(totalVotes) {
@@ -464,6 +482,10 @@ import { getSecondRoundEligibility } from "./election.js";
       return;
     }
     state.firstRoundResults = sorted.map(candidate => ({ ...candidate, votes: state.votes[candidate.id] || 0 }));
+    if (state.type === "presidencial") {
+      state.stateMapResults = simulateStateResults(participants, state.parties, state.votes);
+      renderStateMap();
+    }
     const winner = sorted[0];
     const winnerShare = validVotes ? (state.votes[winner.id] || 0) / validVotes : 0;
     if (winnerShare > 0.5) {
@@ -499,6 +521,44 @@ import { getSecondRoundEligibility } from "./election.js";
     showView("counting");
   });
 
+  function renderStateMap() {
+    const grid = $("stateCartogram");
+    const legend = $("stateMapLegend");
+    if (!grid || !legend) return;
+    if (!state.stateMapResults.length) {
+      grid.innerHTML = "";
+      legend.innerHTML = '<span class="empty">Finalize a apuração presidencial para gerar o mapa.</span>';
+      return;
+    }
+    const winners = [...new Map(state.stateMapResults.map(item => [item.winnerId, item.votes[0]])).values()];
+    legend.innerHTML = winners.map(candidate =>
+      '<span class="map-legend-item"><i style="background:' + candidate.color + '"></i>' +
+      escapeHtml(candidate.name) + ' (' + escapeHtml(candidate.partyAcronym) + ')</span>'
+    ).join("");
+    grid.innerHTML = state.stateMapResults.map(result => {
+      const winner = result.votes[0];
+      const tile = BRAZIL_STATE_TILES.find(item => item.uf === result.uf);
+      return '<button class="state-tile" style="--state-color:' + winner.color +
+        ';grid-column:' + tile.col + ';grid-row:' + tile.row +
+        '" data-state-uf="' + result.uf + '" aria-label="' + escapeHtml(result.name) +
+        ': ' + escapeHtml(winner.name) + ' venceu">' +
+        '<strong>' + result.uf + '</strong><small>' + escapeHtml(result.name) + '</small></button>';
+    }).join("");
+    grid.querySelectorAll("[data-state-uf]").forEach(button => {
+      button.addEventListener("click", () => {
+        const result = state.stateMapResults.find(item => item.uf === button.dataset.stateUf);
+        if (!result) return;
+        $("stateDetail").innerHTML = '<h3>' + escapeHtml(result.name) + ' (' + result.uf +
+          ')</h3>' + result.votes.map(candidate =>
+            '<div class="state-result-row"><span><i style="background:' + candidate.color +
+            '"></i>' + escapeHtml(candidate.name) + ' · ' + escapeHtml(candidate.partyAcronym) +
+            '</span><strong>' + candidate.votes.toLocaleString("pt-BR") + ' · ' +
+            candidate.percent.toFixed(1).replace(".", ",") + '%</strong></div>'
+          ).join("");
+      });
+    });
+  }
+
   function renderResults() {
     const results = $("resultsList");
     if (!results) return;
@@ -527,4 +587,5 @@ import { getSecondRoundEligibility } from "./election.js";
 
   loadPresidential2026Preset();
   renderPeople();
+  renderStateMap();
 })();

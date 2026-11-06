@@ -21,12 +21,13 @@ Acesse http://localhost:8000.
 - `candidates.js`: cargos e cadastro/consulta de candidaturas.
 - `debates.js`: argumentos e seleção de participantes de debates.
 - `apuration.js`: distribuição de lotes e cálculo de percentuais.
-- `governors.js`: disputas estaduais.
+- `governors.js`: consulta de candidaturas estaduais.
+- `state-results.js`: geração de resultados presidenciais fictícios por estado e dados do cartograma.
 - `mayors.js`: disputas municipais.
 - `legislature.js`: cargos legislativos e distribuição inicial de cadeiras.
 - `campaign.js`: efeitos de ações de campanha.
 
 ## Estado atual
-A interface original foi preservada e o projeto recebeu a primeira camada de lógica modular. Os módulos de cargos estaduais/municipais e legislativos estão preparados como base de domínio; a próxima etapa é conectar os formulários da interface a esses módulos para cadastrar candidaturas por cargo e apurar cada disputa separadamente.
+A interface oferece eleições presidenciais, municipais e para governador. No modo governador, os candidatos são vinculados ao estado informado e a apuração é independente. Após a apuração presidencial do primeiro turno, o jogo gera resultados fictícios por unidade federativa e apresenta um cartograma clicável com o vencedor e a distribuição de votos de cada estado.
 
 Todos os resultados são aleatórios e fictícios. Não representam pesquisas, previsões ou resultados eleitorais reais.

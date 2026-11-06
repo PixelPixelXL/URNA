@@ -3,7 +3,8 @@ const STATES = {
   MT: ["Mato Grosso", ["mato grosso", "mt"]],
   MS: ["Mato Grosso do Sul", ["mato grosso do sul", "ms"]],
   DF: ["Distrito Federal", ["distrito federal", "df"]],
-  SP: ["São Paulo", ["sao paulo", "sp"]]
+  SP: ["São Paulo", ["sao paulo", "sp"]],
+  RJ: ["Rio de Janeiro", ["rio de janeiro", "rj"]]
 };
 
 const PARTY_COLORS = {
@@ -58,6 +59,16 @@ const CANDIDATES = {
     ["Tarcísio", "REP", "10"],
     ["Vera Lúcia", "PSTU", "16"],
     ["Vivian Mendes", "UP", "80"]
+  ],
+  RJ: [
+    ["André Marinho", "NOVO", "30"],
+    ["Coronel Busnello", "MISSÃO", "14"],
+    ["Cyro Garcia", "PSTU", "16"],
+    ["Douglas Ruas", "PL", "22"],
+    ["Eduardo Paes", "PSD", "55"],
+    ["Juliete", "UP", "80"],
+    ["Luan Monteiro", "PCO", "29"],
+    ["William Siri", "PSOL", "50"]
   ]
 };
 

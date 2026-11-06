@@ -55,9 +55,9 @@ const CANDIDATES = {
 
 export function getGovernorCandidates2026(region) {
   const normalized = String(region || "").trim().toLocaleLowerCase("pt-BR")
-    .normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const uf = Object.entries(STATES).find(([, [, aliases]]) =>
-    aliases.some(alias => alias.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "") === normalized)
+    aliases.some(alias => alias.normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalized)
   )?.[0];
   if (!uf) return null;
 

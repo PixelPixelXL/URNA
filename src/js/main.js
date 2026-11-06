@@ -199,6 +199,7 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
     state.roundCandidates = null;
     state.firstRoundResults = null;
     state.stateMapResults = [];
+    $("stateMapRoundLabel").textContent = "MAPA · 1º TURNO";
     renderStateMap();
     resetCounting(true);
     const electionLabel = state.type === "municipal" ? "municipal" : state.type === "governador" ? "para governador" : "presidencial";
@@ -494,12 +495,18 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
     $("countingSubtitle").textContent = "Total apurado: " + totalVotes.toLocaleString("pt-BR") + " votos fictícios. Resultado exclusivo da simulação.";
     if (state.round === 2) {
       const winner = sorted[0];
+      if (state.type === "presidencial") {
+        state.stateMapResults = simulateStateResults(participants, state.parties, state.votes);
+        $("stateMapRoundLabel").textContent = "MAPA · 2º TURNO";
+        renderStateMap();
+      }
       $("roundMessage").textContent = "Vencedor simulado do 2º turno: " + winner.name + " (" + (validVotes ? ((state.votes[winner.id] / validVotes) * 100).toFixed(1).replace(".", ",") : "0,0") + "% dos votos válidos).";
       return;
     }
     state.firstRoundResults = sorted.map(candidate => ({ ...candidate, votes: state.votes[candidate.id] || 0 }));
     if (state.type === "presidencial") {
       state.stateMapResults = simulateStateResults(participants, state.parties, state.votes);
+      $("stateMapRoundLabel").textContent = "MAPA · 1º TURNO";
       renderStateMap();
     }
     const winner = sorted[0];

@@ -555,3 +555,18 @@ footer {
     font-size: 8px
   }
 }
+
+/* Governor mode and presidential state cartogram */
+.map-intro{color:var(--muted);font-size:12px;line-height:1.7;margin:0 0 18px}
+.map-legend{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 20px}
+.map-legend-item{display:inline-flex;align-items:center;gap:7px;color:#cbd7e9;font-size:11px}
+.map-legend-item i,.state-result-row i{display:inline-block;width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+.state-cartogram{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));grid-template-rows:repeat(7,64px);gap:7px;max-width:760px;margin:0 auto 24px}
+.state-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;border:1px solid color-mix(in srgb,var(--state-color),white 22%);border-radius:8px;background:color-mix(in srgb,var(--state-color),#101a2e 35%);color:white;cursor:pointer;padding:5px;transition:transform .15s,filter .15s}
+.state-tile:hover,.state-tile:focus-visible{transform:translateY(-2px);filter:brightness(1.18);outline:2px solid #dce8ff;outline-offset:2px}
+.state-tile strong{font-size:13px}.state-tile small{font-size:9px;line-height:1.1;text-align:center;color:#f0f4fc}
+.state-detail{border-top:1px solid var(--line);padding-top:16px}
+.state-detail h3{font-size:16px;margin:0 0 12px}
+.state-result-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #293650;color:#cbd7e9;font-size:11px}
+.state-result-row span{display:flex;align-items:center;gap:8px}.state-result-row strong{text-align:right;white-space:nowrap}
+@media(max-width:700px){.state-cartogram{grid-template-rows:repeat(7,48px);gap:4px}.state-tile{padding:2px}.state-tile strong{font-size:11px}.state-tile small{font-size:7px}.state-result-row{align-items:flex-start;flex-direction:column}.state-result-row strong{text-align:left}}

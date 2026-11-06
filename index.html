@@ -26,13 +26,14 @@
       <button class="tab" data-view="people">02 · Partidos e candidatos</button>
       <button class="tab" data-view="debate">03 · Debate</button>
       <button class="tab" data-view="counting">04 · Apuração</button>
+      <button class="tab" data-view="stateMap">05 · Mapa presidencial</button>
     </nav>
     <section class="view active" id="setup">
       <div class="section-heading"><div><p class="eyebrow">CONFIGURAÇÃO</p><h2>Prepare a disputa</h2></div><span class="step">ETAPA 01 / 04</span></div>
       <div class="panel">
         <label for="electionType">Tipo de eleição</label>
-        <div class="choice-row"><label class="choice"><input type="radio" name="electionType" value="municipal"><span><b>🏙️ Municipal</b><small>Prefeitura da cidade</small></span></label><label class="choice"><input type="radio" name="electionType" value="presidencial" checked><span><b>🇧🇷 Presidencial</b><small>Presidência do país</small></span></label></div>
-        <div class="form-grid"><label>Nome da cidade ou país<input id="placeName" maxlength="60" value="Brasil"></label><label>Ano da eleição<input id="electionYear" type="number" min="2026" max="2100" value="2026"></label><label>Eleitorado simulado<input id="electorate" type="number" min="1000" max="10000000" step="1000" value="100000"></label><label>Comparecimento estimado<select id="turnout"><option value="0.72">72% · Baixo</option><option value="0.82" selected>82% · Médio</option><option value="0.91">91% · Alto</option></select></label></div>
+        <div class="choice-row"><label class="choice"><input type="radio" name="electionType" value="municipal"><span><b>🏙️ Municipal</b><small>Prefeitura da cidade</small></span></label><label class="choice"><input type="radio" name="electionType" value="presidencial" checked><span><b>🇧🇷 Presidencial</b><small>Presidência do país</small></span></label><label class="choice"><input type="radio" name="electionType" value="governador"><span><b>🏛️ Governador</b><small>Governo de um estado</small></span></label></div>
+        <div class="form-grid"><label id="placeLabel">Nome da cidade, país ou estado<input id="placeName" maxlength="60" value="Brasil"></label><label>Ano da eleição<input id="electionYear" type="number" min="2026" max="2100" value="2026"></label><label>Eleitorado simulado<input id="electorate" type="number" min="1000" max="10000000" step="1000" value="100000"></label><label>Comparecimento estimado<select id="turnout"><option value="0.72">72% · Baixo</option><option value="0.82" selected>82% · Médio</option><option value="0.91">91% · Alto</option></select></label></div>
         <button class="primary" id="saveElection">Salvar configuração <span>→</span></button>
         <p class="hint" id="setupMessage">Os números são inventados pelo jogo e não correspondem a previsões reais.</p>
       </div>
@@ -40,7 +41,7 @@
     </section>
     <section class="view" id="people">
       <div class="section-heading"><div><p class="eyebrow">MONTAGEM DA DISPUTA</p><h2>Partidos e candidatos</h2></div><span class="step">ETAPA 02 / 04</span></div>
-      <p class="hint preset-note">Participantes pré-carregados para a simulação presidencial de 2026: Lula (PT), Flávio Bolsonaro (PL), Renan Santos (Missão) e Ronaldo Caiado (PSD). Esta é uma seleção para o jogo, não uma confirmação de candidaturas oficialmente registradas. Para eleições municipais, os nomes dependem da cidade e do ano.</p>
+      <p class="hint preset-note" id="candidateContextNote">Participantes pré-carregados para a simulação presidencial de 2026: Lula (PT), Flávio Bolsonaro (PL), Renan Santos (Missão) e Ronaldo Caiado (PSD). Esta é uma seleção para o jogo, não uma confirmação de candidaturas oficialmente registradas. Para eleições municipais, os nomes dependem da cidade e do ano.</p>
       <details class="create-options"><summary>＋ Criar partidos e candidatos próprios (opcional)</summary><div class="two-col">
         <form class="panel" id="partyForm"><h3>＋ Criar partido</h3><label>Nome do partido<input id="partyName" required maxlength="50" placeholder="Ex.: Partido do Horizonte"></label><label>Sigla<input id="partyAcronym" required maxlength="8" placeholder="Ex.: PH"></label><label>Cor da identidade<input id="partyColor" type="color" value="#3978e8"></label><button class="primary" type="submit">Adicionar partido</button></form>
         <form class="panel" id="candidateForm"><h3>＋ Cadastrar candidato</h3><label>Nome do candidato<input id="candidateName" required maxlength="60" placeholder="Nome fictício"></label><label>Partido<select id="candidateParty" required><option value="">Crie um partido primeiro</option></select></label><label>Proposta principal<select id="candidatePlatform"><option>Educação e saúde</option><option>Emprego e economia</option><option>Segurança pública</option><option>Infraestrutura e transporte</option><option>Meio ambiente</option></select></label><button class="primary" type="submit">Adicionar candidato</button></form>
@@ -61,6 +62,15 @@
       <div class="counting-actions"><button class="primary" id="startCount">Iniciar apuração fictícia</button><button class="secondary" id="nextBatch" disabled>Apurar próximo lote +25%</button><button class="secondary" id="resetCount" disabled>Reiniciar</button><button class="primary" id="startSecondRound" hidden disabled>Iniciar 2º turno →</button></div><p class="hint" id="roundMessage">A eleição começa no 1º turno. A possibilidade de 2º turno será avaliada ao fim da apuração.</p>
       <div class="results-list" id="resultsList"><p class="empty">A apuração ainda não começou.</p></div>
       <p class="hint">Resultados gerados aleatoriamente para o jogo. Não são pesquisas, projeções ou resultados eleitorais reais.</p>
+    </section>
+    <section class="view" id="stateMap">
+      <div class="section-heading"><div><p class="eyebrow">RESULTADO POR UNIDADE FEDERATIVA</p><h2>Mapa presidencial por estado</h2></div><span class="step">MAPA · 1º TURNO</span></div>
+      <div class="panel">
+        <p class="map-intro">Cada unidade federativa recebe a cor do candidato mais votado naquele estado. Clique em um estado para consultar os votos simulados. O cartograma organiza os estados em uma representação esquemática, não em limites geográficos exatos.</p>
+        <div class="map-legend" id="stateMapLegend"><span class="empty">Finalize a apuração presidencial para gerar o mapa.</span></div>
+        <div class="state-cartogram" id="stateCartogram" aria-label="Cartograma dos estados brasileiros"></div>
+        <div class="state-detail" id="stateDetail" aria-live="polite"><p class="empty">Os detalhes estaduais aparecerão aqui.</p></div>
+      </div>
     </section>
     <footer><span>URNA · Protótipo jogável</span><span>Todos os candidatos e resultados são fictícios.</span></footer>
   </main>

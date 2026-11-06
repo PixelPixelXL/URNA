@@ -2,7 +2,8 @@ const STATES = {
   GO: ["Goiás", ["goias", "go"]],
   MT: ["Mato Grosso", ["mato grosso", "mt"]],
   MS: ["Mato Grosso do Sul", ["mato grosso do sul", "ms"]],
-  DF: ["Distrito Federal", ["distrito federal", "df"]]
+  DF: ["Distrito Federal", ["distrito federal", "df"]],
+  SP: ["São Paulo", ["sao paulo", "sp"]]
 };
 
 const PARTY_COLORS = {
@@ -10,7 +11,7 @@ const PARTY_COLORS = {
   PSDB: "#2876bd", PL: "#244a9b", PSD: "#168a54", MOB: "#6c63a8",
   REP: "#3156a5", "MISSÃO": "#f2c230", AGIR: "#e66b32", PRD: "#4d6a91",
   DC: "#2855a6", PP: "#2876bd", NOVO: "#f28c28", PSB: "#e34b72",
-  PSTU: "#b51f2b", PSOL: "#e3a52c"
+  PSTU: "#b51f2b", PSOL: "#e3a52c", PCB: "#b82c2c"
 };
 
 const CANDIDATES = {
@@ -50,6 +51,13 @@ const CANDIDATES = {
     ["Paula Belmonte", "PSDB", "45"],
     ["Professor Robson", "PSTU", "16"],
     ["Professora Samara Mineiro", "UP", "80"]
+  ],
+  SP: [
+    ["Carlos Machado", "PCB", "21"],
+    ["Fernando Haddad", "PT", "13"],
+    ["Tarcísio", "REP", "10"],
+    ["Vera Lúcia", "PSTU", "16"],
+    ["Vivian Mendes", "UP", "80"]
   ]
 };
 

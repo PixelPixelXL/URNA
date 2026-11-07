@@ -20,11 +20,15 @@ function allocate(total, weights) {
 
 export function simulateStateResults(candidates, parties, nationalVotes, random = Math.random) {
   if (!candidates.length) return [];
+  const northeast = new Set(["MA","PI","CE","RN","PB","PE","AL","SE","BA"]);
   return STATES.map(([uf,name]) => {
     const weights = candidates.map(candidate => {
       const base = Math.max(0, Number(nationalVotes[candidate.id]) || 0);
-      // Variação regional fictícia em torno da distribuição nacional.
-      return Math.max(0.01, base * (0.72 + random() * 0.56));
+      const party = parties.find(item => item.id === candidate.partyId);
+      // Preferência regional fictícia: o PT recebe um impulso no Nordeste,
+      // mas a variação aleatória mantém possível a vitória de outros partidos.
+      const regionalFactor = northeast.has(uf) && party?.acronym?.toUpperCase() === "PT" ? 1.45 : 1;
+      return Math.max(0.01, base * regionalFactor * (0.72 + random() * 0.56));
     });
     const total = 10000 + Math.floor(random() * 90001);
     const allocated = allocate(total, weights);

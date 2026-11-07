@@ -14,7 +14,8 @@ const STATES = {
   PB: ["Paraíba", ["paraiba", "pb"]],
   PE: ["Pernambuco", ["pernambuco", "pe"]],
   AL: ["Alagoas", ["alagoas", "al"]],
-  SE: ["Sergipe", ["sergipe", "se"]]
+  SE: ["Sergipe", ["sergipe", "se"]],
+  ES: ["Espírito Santo", ["espirito santo", "es"]]
 };
 
 const PARTY_COLORS = {
@@ -165,6 +166,13 @@ const CANDIDATES = {
     ["Fábio", "PSD", "55"],
     ["Taty Cristina de Jesus", "DC", "27"],
     ["Valmir de Francisquinho", "REP", "10"]
+  ],
+  ES: [
+    ["Breno Barcelos", "MISSÃO", "14"],
+    ["Helder Salomão", "PT", "13"],
+    ["Lorenzo Pazolini", "REP", "10"],
+    ["Rafael Demuner", "UP", "80"],
+    ["Ricardo Ferraço", "MDB", "15"]
   ]
 };
 

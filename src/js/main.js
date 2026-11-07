@@ -129,7 +129,7 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
       const placeLabel = $("placeLabel");
       if (placeLabel) placeLabel.firstChild.textContent = input.value === "governador" ? "Estado da disputa" : input.value === "municipal" ? "Nome da cidade" : "Nome do país";
       const note = $("candidateContextNote");
-      if (note) note.textContent = input.value === "governador" ? "Modo governador: o catálogo de 2026 carrega automaticamente os candidatos de GO, MT, MS ou DF. Você pode editar a lista e adicionar candidatos próprios. Os resultados são fictícios." : input.value === "municipal" ? "Modo municipal: cadastre os candidatos da cidade escolhida. O catálogo presidencial não será reutilizado." : "Participantes pré-carregados para a simulação presidencial de 2026. Esta seleção é para o jogo, não uma confirmação de candidaturas oficialmente registradas."; 
+      if (note) note.textContent = input.value === "governador" ? "Modo governador: o catálogo de 2026 carrega automaticamente os candidatos de GO, MT, MS, DF, SP, RJ, MG, BA, CE, MA, PI, RN, PB, PE, AL e SE. Você pode editar a lista e adicionar candidatos próprios. Os resultados são fictícios." : input.value === "municipal" ? "Modo municipal: cadastre os candidatos da cidade escolhida. O catálogo presidencial não será reutilizado." : "Participantes pré-carregados para a simulação presidencial de 2026. Esta seleção é para o jogo, não uma confirmação de candidaturas oficialmente registradas."; 
     });
   });
 
@@ -184,7 +184,7 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
         } else {
           state.parties = [];
           state.candidates = [];
-          toast("Catálogo automático disponível para GO, MT, MS e DF. Informe a UF ou o nome do estado.");
+          toast("Catálogo automático disponível para 16 estados/DF. Informe a UF ou o nome do estado.");
         }
       } else {
         // Catálogos estaduais e municipais são específicos da região escolhida.

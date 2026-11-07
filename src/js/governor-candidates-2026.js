@@ -4,6 +4,7 @@ const STATES = {
   MS: ["Mato Grosso do Sul", ["mato grosso do sul", "ms"]],
   DF: ["Distrito Federal", ["distrito federal", "df"]],
   SP: ["São Paulo", ["sao paulo", "sp"]],
+  MG: ["Minas Gerais", ["minas gerais", "mg"]],
   RJ: ["Rio de Janeiro", ["rio de janeiro", "rj"]],
   BA: ["Bahia", ["bahia", "ba"]],
   CE: ["Ceará", ["ceara", "ce"]],
@@ -22,7 +23,7 @@ const PARTY_COLORS = {
   REP: "#3156a5", "MISSÃO": "#f2c230", AGIR: "#e66b32", PRD: "#4d6a91",
   DC: "#2855a6", PP: "#2876bd", NOVO: "#f28c28", PSB: "#e34b72",
   PSTU: "#b51f2b", PSOL: "#e3a52c", PCB: "#b82c2c",
-  "UNIÃO": "#2455a4", DEMOCRATA: "#5b6f91", PRTB: "#3156a5"
+  "UNIÃO": "#2455a4", DEMOCRATA: "#5b6f91", PRTB: "#3156a5", PDT: "#2876bd"
 };
 
 const CANDIDATES = {
@@ -69,6 +70,18 @@ const CANDIDATES = {
     ["Tarcísio", "REP", "10"],
     ["Vera Lúcia", "PSTU", "16"],
     ["Vivian Mendes", "UP", "80"]
+  ],
+  MG: [
+    ["Alexandre Kalil", "PDT", "12"],
+    ["Ben Mendes", "MISSÃO", "14"],
+    ["Cleitinho Azevedo", "REP", "10"],
+    ["Flávio Roscoe", "PL", "22"],
+    ["Gabriel", "MDB", "15"],
+    ["Indira Xavier", "UP", "80"],
+    ["Mateus Simões", "PSD", "55"],
+    ["Patrus Ananias", "PT", "13"],
+    ["Professor Túlio Lopes", "PCB", "21"],
+    ["Rafael Duda", "PSTU", "16"]
   ],
   RJ: [
     ["André Marinho", "NOVO", "30"],

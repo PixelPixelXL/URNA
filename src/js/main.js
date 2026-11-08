@@ -421,8 +421,12 @@ import { getFederalDeputyCandidates2026 } from "./federal-deputy-candidates-2026
     const weights = participants.map(candidate => {
       const party = state.parties.find(item => item.id === candidate.partyId);
       const acronym = party ? party.acronym.toUpperCase() : "";
-      if (state.type === "deputado-federal") return 0.5 + Math.random();
-      // PT e PL têm peso maior apenas nos modos gerais já existentes.
+      // Governador e deputado federal usam pesos neutros:
+      // nenhum partido recebe vantagem automática na apuração.
+      if (state.type === "governador" || state.type === "deputado-federal") {
+        return 0.5 + Math.random();
+      }
+      // A preferência por PT e PL permanece somente nos modos gerais restantes.
       return (acronym === "PT" || acronym === "PL" ? 5 : 0.35) + Math.random() * (acronym === "PT" || acronym === "PL" ? 1.2 : 0.9);
     });
     const allocated = allocateVotes(totalVotes, weights);

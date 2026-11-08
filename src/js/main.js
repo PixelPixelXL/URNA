@@ -132,7 +132,7 @@ import { getFederalDeputyCandidates2026 } from "./federal-deputy-candidates-2026
       if (input.value === "deputado-federal") $("placeName").value = "Brasil";
       $("placeName").disabled = input.value === "deputado-federal";
       const note = $("candidateContextNote");
-      if (note) note.textContent = input.value === "governador" ? "Modo governador: o catálogo de 2026 carrega automaticamente os candidatos de GO, MT, MS, DF, SP, RJ, MG, ES, BA, CE, MA, PI, RN, PB, PE, AL e SE. Você pode editar a lista e adicionar candidatos próprios. Os resultados são fictícios." : input.value === "municipal" ? "Modo municipal: cadastre os candidatos da cidade escolhida. O catálogo presidencial não será reutilizado." : "Participantes pré-carregados para a simulação presidencial de 2026. Esta seleção é para o jogo, não uma confirmação de candidaturas oficialmente registradas."; 
+      if (note) note.textContent = input.value === "governador" ? "Modo governador: o catálogo de 2026 carrega automaticamente os candidatos de 17 estados/DF. Os resultados são fictícios." : input.value === "municipal" ? "Modo municipal: cadastre os candidatos da cidade escolhida. O catálogo presidencial não será reutilizado." : input.value === "deputado-federal" ? "Catálogo de 705 candidatos carregado em uma única lista nacional, sem separação por estado. Dados da lista enviada; resultados fictícios." : "Participantes pré-carregados para a simulação presidencial de 2026. Esta seleção é para o jogo, não uma confirmação de candidaturas oficialmente registradas."; 
     });
   });
 
@@ -485,6 +485,9 @@ import { getFederalDeputyCandidates2026 } from "./federal-deputy-candidates-2026
 
   function getRoundCandidates() {
     if (state.roundCandidates) return state.roundCandidates;
+    if (state.type === "deputado-federal") {
+      return state.candidates.filter(candidate => candidate.office === "federal-deputy");
+    }
     if (state.type === "governador") {
       return state.candidates.filter(candidate => candidate.office === "governor" &&
         String(candidate.region || "").toLocaleLowerCase("pt-BR") === state.place.toLocaleLowerCase("pt-BR"));

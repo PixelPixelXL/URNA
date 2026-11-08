@@ -24,12 +24,27 @@ export function simulateStateResults(candidates, parties, nationalVotes, random 
   return STATES.map(([uf,name]) => {
     const weights = candidates.map(candidate => {
       const base = Math.max(0, Number(nationalVotes[candidate.id]) || 0);
-      const party = parties.find(item => item.id === candidate.partyId);
-      // Preferência regional fictícia: o PT recebe um impulso no Nordeste,
-      // mas a variação aleatória mantém possível a vitória de outros partidos.
-      const regionalFactor = northeast.has(uf) && party?.acronym?.toUpperCase() === "PT" ? 1.45 : 1;
-      return Math.max(0.01, base * regionalFactor * (0.72 + random() * 0.56));
+      return Math.max(0.01, base * (0.72 + random() * 0.56));
     });
+
+    // Regra fictícia do URNA: quando houver candidato do PT,
+    // ele sempre vence nos nove estados do Nordeste.
+    if (northeast.has(uf)) {
+      const ptIndexes = candidates
+        .map((candidate, index) => ({ candidate, index }))
+        .filter(({ candidate }) => {
+          const party = parties.find(item => item.id === candidate.partyId);
+          return party?.acronym?.toUpperCase() === "PT";
+        })
+        .map(({ index }) => index);
+
+      if (ptIndexes.length) {
+        const nonPtMax = Math.max(0, ...weights.filter((_, index) => !ptIndexes.includes(index)));
+        const ptIndex = ptIndexes.reduce((best, index) => weights[index] > weights[best] ? index : best, ptIndexes[0]);
+        weights[ptIndex] = Math.max(weights[ptIndex], nonPtMax * (1.08 + random() * 0.22));
+      }
+    }
+
     const total = 10000 + Math.floor(random() * 90001);
     const allocated = allocate(total, weights);
     const votes = candidates.map((candidate,index) => {

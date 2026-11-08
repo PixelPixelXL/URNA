@@ -1,6 +1,7 @@
 import { getSecondRoundEligibility } from "./election.js";
 import { simulateStateResults } from "./state-results.js";
 import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
+import { getFederalDeputyCandidates2026 } from "./federal-deputy-candidates-2026.js";
 (() => {
   "use strict";
 
@@ -127,7 +128,9 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
       const choiceRow = document.querySelector(".choice-row");
       if (choiceRow) choiceRow.setAttribute("aria-label", input.value);
       const placeLabel = $("placeLabel");
-      if (placeLabel) placeLabel.firstChild.textContent = input.value === "governador" ? "Estado da disputa" : input.value === "municipal" ? "Nome da cidade" : "Nome do país";
+      if (placeLabel) placeLabel.firstChild.textContent = input.value === "governador" ? "Estado da disputa" : input.value === "municipal" ? "Nome da cidade" : input.value === "deputado-federal" ? "Abrangência da disputa" : "Nome do país";
+      if (input.value === "deputado-federal") $("placeName").value = "Brasil";
+      $("placeName").disabled = input.value === "deputado-federal";
       const note = $("candidateContextNote");
       if (note) note.textContent = input.value === "governador" ? "Modo governador: o catálogo de 2026 carrega automaticamente os candidatos de GO, MT, MS, DF, SP, RJ, MG, ES, BA, CE, MA, PI, RN, PB, PE, AL e SE. Você pode editar a lista e adicionar candidatos próprios. Os resultados são fictícios." : input.value === "municipal" ? "Modo municipal: cadastre os candidatos da cidade escolhida. O catálogo presidencial não será reutilizado." : "Participantes pré-carregados para a simulação presidencial de 2026. Esta seleção é para o jogo, não uma confirmação de candidaturas oficialmente registradas."; 
     });
@@ -175,6 +178,11 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
     if (state.catalogMode) {
       if (state.type === "presidencial" && state.year === 2026) {
         loadPresidential2026Preset();
+      } else if (state.type === "deputado-federal" && state.year === 2026) {
+        state.place = "Brasil";
+        const federalCatalog = getFederalDeputyCandidates2026();
+        state.parties = federalCatalog.parties;
+        state.candidates = federalCatalog.candidates;
       } else if (state.type === "governador" && state.year === 2026) {
         const governorCatalog = getGovernorCandidates2026(state.place);
         if (governorCatalog) {
@@ -202,7 +210,7 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
     $("stateMapRoundLabel").textContent = "MAPA · 1º TURNO";
     renderStateMap();
     resetCounting(true);
-    const electionLabel = state.type === "municipal" ? "municipal" : state.type === "governador" ? "para governador" : "presidencial";
+    const electionLabel = state.type === "municipal" ? "municipal" : state.type === "governador" ? "para governador" : state.type === "deputado-federal" ? "para deputado federal" : "presidencial";
     $("setupMessage").textContent = "Eleição " + electionLabel +
       " configurada para " + state.place + ", " + state.year + ". Tudo pronto para montar a disputa.";
     $("countingTitle").textContent = "Eleição de " + state.year + " · " + state.place;
@@ -267,7 +275,7 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
       id: crypto.randomUUID(),
       name,
       partyId,
-      office: state.type === "governador" ? "governor" : state.type === "presidencial" ? "president" : "mayor",
+      office: state.type === "governador" ? "governor" : state.type === "presidencial" ? "president" : state.type === "deputado-federal" ? "federal-deputy" : "mayor",
       region: state.type === "presidencial" ? "Brasil" : state.place,
       platform: $("candidatePlatform").value.trim() || "Sem propostas específicas."
     });
@@ -307,7 +315,7 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
             escapeHtml(c.name) + "</strong><small>" +
             (c.ballotNumber ? "Nº " + escapeHtml(c.ballotNumber) + " · " : "") +
             escapeHtml(party ? party.acronym + " · " + party.name : "Sem partido") +
-            (c.office === "governor" ? " · Governador · " + escapeHtml(c.region) : c.office === "mayor" ? " · Prefeito · " + escapeHtml(c.region) : "") +
+            (c.office === "governor" ? " · Governador · " + escapeHtml(c.region) : c.office === "mayor" ? " · Prefeito · " + escapeHtml(c.region) : c.office === "federal-deputy" ? " · Deputado federal" : "") +
             " · Proposta: " + escapeHtml(c.platform) +
             '</small></div><button class="remove-btn" data-remove-candidate="' + c.id + '">Excluir</button></div>';
         }).join("")
@@ -413,7 +421,8 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
     const weights = participants.map(candidate => {
       const party = state.parties.find(item => item.id === candidate.partyId);
       const acronym = party ? party.acronym.toUpperCase() : "";
-      // PT e PL têm peso maior na simulação, sem garantir resultado político real.
+      if (state.type === "deputado-federal") return 0.5 + Math.random();
+      // PT e PL têm peso maior apenas nos modos gerais já existentes.
       return (acronym === "PT" || acronym === "PL" ? 5 : 0.35) + Math.random() * (acronym === "PT" || acronym === "PL" ? 1.2 : 0.9);
     });
     const allocated = allocateVotes(totalVotes, weights);
@@ -480,6 +489,9 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
       return state.candidates.filter(candidate => candidate.office === "governor" &&
         String(candidate.region || "").toLocaleLowerCase("pt-BR") === state.place.toLocaleLowerCase("pt-BR"));
     }
+    if (state.type === "deputado-federal") {
+      return state.candidates.filter(candidate => candidate.office === "federal-deputy");
+    }
     if (state.type === "municipal") {
       return state.candidates.filter(candidate => candidate.office === "mayor" &&
         String(candidate.region || "").toLocaleLowerCase("pt-BR") === state.place.toLocaleLowerCase("pt-BR"));
@@ -493,6 +505,10 @@ import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
     const validVotes = sorted.reduce((sum, candidate) => sum + (state.votes[candidate.id] || 0), 0);
     $("countingTitle").textContent = "Apuração do " + (state.round === 1 ? "1º" : "2º") + " turno finalizada · " + state.place;
     $("countingSubtitle").textContent = "Total apurado: " + totalVotes.toLocaleString("pt-BR") + " votos fictícios. Resultado exclusivo da simulação.";
+    if (state.type === "deputado-federal") {
+      $("roundMessage").textContent = "Apuração nacional simulada concluída. Os 705 candidatos concorreram em uma única lista, sem divisão estadual. A classificação representa apenas votos fictícios do jogo.";
+      return;
+    }
     if (state.round === 2) {
       const winner = sorted[0];
       if (state.type === "presidencial") {

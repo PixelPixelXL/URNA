@@ -2,6 +2,7 @@ import { getSecondRoundEligibility } from "./election.js";
 import { simulateStateResults } from "./state-results.js";
 import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
 import { getFederalDeputyCandidates2026 } from "./federal-deputy-candidates-2026.js";
+import { renderMinasMunicipalMap } from "./minas-municipal-map.js";
 (() => {
   "use strict";
 
@@ -523,6 +524,9 @@ import { getFederalDeputyCandidates2026 } from "./federal-deputy-candidates-2026
         $("stateMapRoundLabel").textContent = "MAPA · 2º TURNO";
         renderStateMap();
       }
+      if (state.type === "governador" && /^(mg|minas gerais)$/i.test(state.place)) {
+        renderMinasMunicipalMap({ candidates: participants, parties: state.parties, votes: state.votes, round: 2 });
+      }
       $("roundMessage").textContent = "Vencedor simulado do 2º turno: " + winner.name + " (" + (validVotes ? ((state.votes[winner.id] / validVotes) * 100).toFixed(1).replace(".", ",") : "0,0") + "% dos votos válidos).";
       return;
     }
@@ -531,6 +535,9 @@ import { getFederalDeputyCandidates2026 } from "./federal-deputy-candidates-2026
       state.stateMapResults = simulateStateResults(participants, state.parties, state.votes);
       $("stateMapRoundLabel").textContent = "MAPA · 1º TURNO";
       renderStateMap();
+    }
+    if (state.type === "governador" && /^(mg|minas gerais)$/i.test(state.place)) {
+      renderMinasMunicipalMap({ candidates: participants, parties: state.parties, votes: state.votes, round: 1 });
     }
     const winner = sorted[0];
     const winnerShare = validVotes ? (state.votes[winner.id] || 0) / validVotes : 0;

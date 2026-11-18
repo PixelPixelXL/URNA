@@ -27,7 +27,7 @@ export async function renderMinasMunicipalMap({candidates,parties,votes,round}){
   }
   const pts=[];features.forEach(f=>rings(f.geometry).forEach(poly=>(poly[0]||[]).forEach(p=>pts.push(p))));
   const lat=-19.5,proj=([x,y])=>[x*Math.cos(lat*Math.PI/180),y],pp=pts.map(proj);
-  const minX=Math.min(...pp.map(p=>p[0])),maxX=Math.max(...pp.map(p=>p[0]),minY=Math.min(...pp.map(p=>p[1])),maxY=Math.max(...pp.map(p=>p[1]));
+  const minX=Math.min(...pp.map(p=>p[0])),maxX=Math.max(...pp.map(p=>p[0])),minY=Math.min(...pp.map(p=>p[1])),maxY=Math.max(...pp.map(p=>p[1]));
   const W=900,H=760,pad=12,scale=Math.min((W-2*pad)/(maxX-minX),(H-2*pad)/(maxY-minY));
   const ox=(W-(maxX-minX)*scale)/2,oy=(H-(maxY-minY)*scale)/2;
   const xy=p=>{const [x,y]=proj(p);return [ox+(x-minX)*scale,H-oy-(y-minY)*scale];};

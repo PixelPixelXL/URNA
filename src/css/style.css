@@ -582,3 +582,13 @@ footer {
 .state-map-label{font:700 10px 'DM Sans',sans-serif;fill:#fff;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#101a2e;stroke-width:2.5px;stroke-linejoin:round;pointer-events:none}
 .state-detail-total{margin:-4px 0 10px;color:var(--muted);font-size:11px}
 @media(max-width:700px){.state-map{padding:0}.state-map-label{font-size:9px}}
+
+
+/* Mapa municipal de Minas Gerais */
+.municipal-map{width:100%;max-width:900px;margin:4px auto 24px;overflow-x:auto}
+.municipal-map svg{display:block;width:100%;height:auto;min-width:320px}
+.municipality-shape{stroke:#18253b;stroke-width:.38;stroke-linejoin:round;vector-effect:non-scaling-stroke;cursor:pointer;transition:filter .12s,stroke-width .12s}
+.municipality-shape:hover,.municipality-shape:focus-visible{filter:brightness(1.35);stroke:#fff;stroke-width:1.5;outline:none}
+.municipality-shape.is-selected{stroke:#fff;stroke-width:1.8}
+.map-source{color:#8192ac;font-size:10px;margin:18px 0 0}
+@media(max-width:700px){.municipal-map svg{min-width:560px}}

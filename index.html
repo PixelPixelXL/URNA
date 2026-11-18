@@ -27,6 +27,7 @@
       <button class="tab" data-view="debate">03 · Debate</button>
       <button class="tab" data-view="counting">04 · Apuração</button>
       <button class="tab" data-view="stateMap">05 · Mapa presidencial</button>
+      <button class="tab" data-view="municipalMap">06 · Mapa municipal MG</button>
     </nav>
     <section class="view active" id="setup">
       <div class="section-heading"><div><p class="eyebrow">CONFIGURAÇÃO</p><h2>Prepare a disputa</h2></div><span class="step">ETAPA 01 / 04</span></div>
@@ -71,6 +72,16 @@
         <div class="state-map" id="stateCartogram" aria-label="Mapa geográfico das unidades federativas do Brasil"></div>
         <div class="state-detail" id="stateDetail" aria-live="polite"><p class="empty">Os detalhes estaduais aparecerão aqui.</p></div>
         <p class="map-source">Limites estaduais: Click That Hood / Code for Germany · licença MIT.</p>
+      </div>
+    </section>
+    <section class="view" id="municipalMap">
+      <div class="section-heading"><div><p class="eyebrow">RESULTADO POR MUNICÍPIO</p><h2>Minas Gerais · 853 municípios</h2></div><span class="step" id="municipalMapRoundLabel">MAPA · AGUARDANDO</span></div>
+      <div class="panel">
+        <p class="map-intro">Cada área representa um município de Minas Gerais. As cores mostram o candidato mais votado na simulação; selecione uma cidade para consultar votos e percentuais. Os resultados são fictícios, não oficiais.</p>
+        <div class="map-legend" id="municipalMapLegend"><span class="empty">Finalize a apuração para colorir os municípios.</span></div>
+        <div class="municipal-map" id="minasMunicipalMap" aria-label="Mapa de Minas Gerais dividido nos 853 municípios"></div>
+        <div class="state-detail" id="municipalDetail" aria-live="polite"><p class="empty">Os detalhes municipais aparecerão aqui.</p></div>
+        <p class="map-source">Malha municipal: IBGE · API de Malhas Territoriais · qualidade mínima.</p>
       </div>
     </section>
     <footer><span>URNA · Protótipo jogável</span><span>Todos os candidatos e resultados são fictícios.</span></footer>

@@ -590,5 +590,6 @@ footer {
 .municipality-shape{stroke:#18253b;stroke-width:.38;stroke-linejoin:round;vector-effect:non-scaling-stroke;cursor:pointer;transition:filter .12s,stroke-width .12s}
 .municipality-shape:hover,.municipality-shape:focus-visible{filter:brightness(1.35);stroke:#fff;stroke-width:1.5;outline:none}
 .municipality-shape.is-selected{stroke:#fff;stroke-width:1.8}
+.municipal-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 18px}.municipal-summary-card{background:#17243b;border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}.municipal-summary-card strong{display:block;color:#f3f7ff;font-size:16px;overflow-wrap:anywhere}.municipal-summary-card span{display:block;color:var(--muted);font-size:11px;margin-top:5px}.municipal-summary-heading{font-size:13px;margin:18px 0 6px;color:#e5edf9}.municipal-summary-note{color:var(--muted);font-size:11px;line-height:1.6;margin:14px 0 0}@media(max-width:480px){.municipal-summary-grid{grid-template-columns:1fr}}
 .map-source{color:#8192ac;font-size:10px;margin:18px 0 0}
 @media(max-width:700px){.municipal-map svg{min-width:560px}}

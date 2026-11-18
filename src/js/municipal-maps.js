@@ -5,54 +5,373 @@ const STATES = {
   BA: { code: 29, name: "Bahia", count: 417 },
   SE: { code: 28, name: "Sergipe", count: 75 }
 };
+
 const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const hash = s => { let h=2166136261; for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619);} return h>>>0; };
-function allocate(total,weights){const sum=weights.reduce((a,b)=>a+b,0);const q=weights.map(w=>sum?total*w/sum:total/weights.length);const v=q.map(Math.floor);let rest=total-v.reduce((a,b)=>a+b,0);q.map((x,i)=>({i,f:x-v[i]})).sort((a,b)=>b.f-a.f).slice(0,rest).forEach(x=>v[x.i]++);return v;}
-const rings = g => g.type==="Polygon"?[g.coordinates]:g.type==="MultiPolygon"?g.coordinates:[];
-const normalize = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
-export async function renderMunicipalMap({place,candidates,parties,votes,round}){
- const uf=normalize(place);
- const entry=Object.entries(STATES).find(([key,s])=>normalize(key)===uf||normalize(s.name)===uf);
- const state=entry?.[1], map=$("municipalMapCanvas"), legend=$("municipalMapLegend"), detail=$("municipalMapDetail");
- if(!state||!map||!legend||!detail)return;
- $("municipalMapTitle").textContent=state.name+" · "+state.count+" municípios";
- $("municipalMapRoundLabel").textContent="MAPA · "+round+"º TURNO";
- map.innerHTML='<p class="empty">Carregando a malha municipal do IBGE…</p>';
- try{
-  const base="https://servicodados.ibge.gov.br/api/";
-  const [a,b]=await Promise.all([
-   fetch(base+"v3/malhas/estados/"+state.code+"?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=municipio"),
-   fetch(base+"v1/localidades/estados/"+state.code+"/municipios")
-  ]);
-  if(!a.ok||!b.ok)throw new Error("Falha ao consultar o IBGE.");
-  const [geo,names]=await Promise.all([a.json(),b.json()]);
-  const features=(geo.features||[]).filter(f=>f.geometry&&f.properties?.codarea);
-  if(features.length!==state.count)throw new Error("A malha retornou "+features.length+" municípios; eram esperados "+state.count+".");
-  const nameByCode=new Map(names.map(x=>[String(x.id),x.nome])),results=new Map();
-  for(const f of features){
-   const code=String(f.properties.codarea),name=nameByCode.get(code)||("Município "+code);
-   const weights=candidates.map(c=>Math.max(.01,(Number(votes[c.id])||0)*(.62+(hash(code+c.id)%7600)/10000)));
-   const total=1800+hash(code+"turnout")%68000,allocated=allocate(total,weights);
-   const rows=candidates.map((c,i)=>{const p=parties.find(x=>x.id===c.partyId);return {name:c.name,party:p?.acronym||"IND",color:p?.color||"#718096",votes:allocated[i],percent:allocated[i]/total*100};}).sort((x,y)=>y.votes-x.votes);
-   results.set(code,{code,name,total,rows});
+
+const esc = value =>
+  String(value).replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[character]);
+
+const hash = value => {
+  let result = 2166136261;
+
+  for (const character of String(value)) {
+    result ^= character.charCodeAt(0);
+    result = Math.imul(result, 16777619);
   }
-  const pts=[];features.forEach(f=>rings(f.geometry).forEach(poly=>(poly[0]||[]).forEach(p=>pts.push(p))));
-  const lat=state.code===31?-19.5:state.code===33?-22:state.code===35?-22.5:-12,proj=([x,y])=>[x*Math.cos(lat*Math.PI/180),y],pp=pts.map(proj);
-  const minX=Math.min(...pp.map(p=>p[0])),maxX=Math.max(...pp.map(p=>p[0])),minY=Math.min(...pp.map(p=>p[1])),maxY=Math.max(...pp.map(p=>p[1]));
-  const W=900,H=760,pad=12,scale=Math.min((W-2*pad)/(maxX-minX),(H-2*pad)/(maxY-minY));
-  const ox=(W-(maxX-minX)*scale)/2,oy=(H-(maxY-minY)*scale)/2;
-  const xy=p=>{const [x,y]=proj(p);return [ox+(x-minX)*scale,H-oy-(y-minY)*scale];};
-  const ringPath=r=>r.map((p,i)=>{const [x,y]=xy(p);return (i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1);}).join(" ")+" Z";
-  const path=g=>rings(g).map(poly=>poly.map(ringPath).join(" ")).join(" ");
-  map.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="group" aria-label="'+esc(state.name)+' dividido em '+state.count+' municípios">'+features.map(f=>{
-   const code=String(f.properties.codarea),r=results.get(code),w=r.rows[0];
-   return '<path class="municipality-shape" d="'+path(f.geometry)+'" fill="'+w.color+'" data-municipality="'+code+'" tabindex="0" role="button" aria-label="'+esc(r.name)+': '+esc(w.name)+' venceu"><title>'+esc(r.name)+' — '+esc(w.name)+'</title></path>';
-  }).join("")+'</svg>';
-  const winners=[...new Map([...results.values()].map(r=>[r.rows[0].name,r.rows[0]])).values()];
-  legend.innerHTML=winners.map(w=>'<span class="map-legend-item"><i style="background:'+w.color+'"></i>'+esc(w.name)+' ('+esc(w.party)+')</span>').join("");
-  const show=code=>{const r=results.get(code);if(!r)return;detail.innerHTML='<h3>'+esc(r.name)+' · '+entry[0]+'</h3><p class="state-detail-total">'+r.total.toLocaleString("pt-BR")+' votos simulados</p>'+r.rows.map(x=>'<div class="state-result-row"><span><i style="background:'+x.color+'"></i>'+esc(x.name)+' · '+esc(x.party)+'</span><strong>'+x.votes.toLocaleString("pt-BR")+' · '+x.percent.toFixed(1).replace(".",",")+'%</strong></div>').join("");map.querySelectorAll("[data-municipality]").forEach(p=>p.classList.toggle("is-selected",p.dataset.municipality===code));};
-  map.querySelectorAll(".municipality-shape").forEach(p=>{p.addEventListener("click",()=>show(p.dataset.municipality));p.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();show(p.dataset.municipality);}});});
-  detail.innerHTML='<p class="empty">Mapa pronto. Clique em qualquer município para consultar os votos simulados.</p>';
- }catch(e){map.innerHTML='<p class="empty">Não foi possível montar o mapa: '+esc(e.message)+'</p>';legend.innerHTML='<span class="empty">Mapa indisponível; confira a conexão e atualize.</span>';}
+
+  return result >>> 0;
+};
+
+function allocate(total, weights) {
+  if (weights.length === 0) {
+    return [];
+  }
+
+  const sum = weights.reduce((accumulator, weight) => accumulator + weight, 0);
+  const quotas = weights.map(weight =>
+    sum ? (total * weight) / sum : total / weights.length
+  );
+  const allocated = quotas.map(Math.floor);
+  const remainder = total - allocated.reduce((accumulator, value) => accumulator + value, 0);
+
+  quotas
+    .map((quota, index) => ({
+      index,
+      fraction: quota - allocated[index]
+    }))
+    .sort((a, b) => b.fraction - a.fraction)
+    .slice(0, remainder)
+    .forEach(item => {
+      allocated[item.index]++;
+    });
+
+  return allocated;
+}
+
+const rings = geometry => {
+  if (geometry.type === "Polygon") {
+    return [geometry.coordinates];
+  }
+
+  if (geometry.type === "MultiPolygon") {
+    return geometry.coordinates;
+  }
+
+  return [];
+};
+
+const normalize = value =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+export async function renderMunicipalMap({
+  place,
+  candidates,
+  parties,
+  votes,
+  round
+}) {
+  const uf = normalize(place);
+  const entry = Object.entries(STATES).find(([key, state]) =>
+    normalize(key) === uf || normalize(state.name) === uf
+  );
+
+  const state = entry?.[1];
+  const map = $("municipalMapCanvas");
+  const legend = $("municipalMapLegend");
+  const detail = $("municipalMapDetail");
+
+  if (!state || !map || !legend || !detail) {
+    return;
+  }
+
+  if (!candidates?.length) {
+    map.innerHTML = '<p class="empty">Não há candidatos para montar o mapa.</p>';
+    legend.innerHTML = "";
+    detail.innerHTML = "";
+    return;
+  }
+
+  $("municipalMapTitle").textContent =
+    state.name + " · " + state.count + " municípios";
+  $("municipalMapRoundLabel").textContent = "MAPA · " + round + "º TURNO";
+  map.innerHTML = '<p class="empty">Carregando a malha municipal do IBGE…</p>';
+
+  try {
+    const base = "https://servicodados.ibge.gov.br/api/";
+    const [geometryResponse, namesResponse] = await Promise.all([
+      fetch(
+        base +
+          "v3/malhas/estados/" +
+          state.code +
+          "?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=municipio"
+      ),
+      fetch(base + "v1/localidades/estados/" + state.code + "/municipios")
+    ]);
+
+    if (!geometryResponse.ok || !namesResponse.ok) {
+      throw new Error("Falha ao consultar o IBGE.");
+    }
+
+    const [geo, names] = await Promise.all([
+      geometryResponse.json(),
+      namesResponse.json()
+    ]);
+
+    const features = (geo.features || []).filter(
+      feature => feature.geometry && feature.properties?.codarea
+    );
+
+    if (features.length !== state.count) {
+      throw new Error(
+        "A malha retornou " +
+          features.length +
+          " municípios; eram esperados " +
+          state.count +
+          "."
+      );
+    }
+
+    const nameByCode = new Map(
+      names.map(item => [String(item.id), item.nome])
+    );
+    const results = new Map();
+
+    for (const feature of features) {
+      const code = String(feature.properties.codarea);
+      const name = nameByCode.get(code) || "Município " + code;
+
+      const weights = candidates.map(candidate =>
+        Math.max(
+          0.01,
+          (Number(votes[candidate.id]) || 0) *
+            (0.62 + (hash(code + candidate.id) % 7600) / 10000)
+        )
+      );
+
+      const total = 1800 + (hash(code + "turnout") % 68000);
+      const allocated = allocate(total, weights);
+
+      const rows = candidates
+        .map((candidate, index) => {
+          const party = parties.find(item => item.id === candidate.partyId);
+
+          return {
+            name: candidate.name,
+            party: party?.acronym || "IND",
+            color: party?.color || "#718096",
+            votes: allocated[index],
+            percent: (allocated[index] / total) * 100
+          };
+        })
+        .sort((a, b) => b.votes - a.votes);
+
+      results.set(code, { code, name, total, rows });
+    }
+
+    const points = [];
+
+    features.forEach(feature => {
+      rings(feature.geometry).forEach(polygon => {
+        (polygon[0] || []).forEach(point => points.push(point));
+      });
+    });
+
+    if (points.length === 0) {
+      throw new Error("A malha do IBGE não contém coordenadas válidas.");
+    }
+
+    const latitude =
+      state.code === 31
+        ? -19.5
+        : state.code === 33
+          ? -22
+          : state.code === 35
+            ? -22.5
+            : -12;
+
+    const project = ([longitude, lat]) => [
+      longitude * Math.cos((latitude * Math.PI) / 180),
+      lat
+    ];
+
+    // Calcula os limites em um loop para evitar estouro de argumentos
+    // em estados com muitos vértices na malha municipal.
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    points.forEach(point => {
+      const [x, y] = project(point);
+
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    });
+
+    const width = 900;
+    const height = 760;
+    const padding = 12;
+    const scale = Math.min(
+      (width - 2 * padding) / (maxX - minX),
+      (height - 2 * padding) / (maxY - minY)
+    );
+    const offsetX = (width - (maxX - minX) * scale) / 2;
+    const offsetY = (height - (maxY - minY) * scale) / 2;
+
+    const toSvgCoordinates = point => {
+      const [x, y] = project(point);
+
+      return [
+        offsetX + (x - minX) * scale,
+        height - offsetY - (y - minY) * scale
+      ];
+    };
+
+    const ringPath = ring =>
+      ring
+        .map((point, index) => {
+          const [x, y] = toSvgCoordinates(point);
+          return (index ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1);
+        })
+        .join(" ") + " Z";
+
+    const geometryPath = geometry =>
+      rings(geometry)
+        .map(polygon => polygon.map(ringPath).join(" "))
+        .join(" ");
+
+    map.innerHTML =
+      '<svg viewBox="0 0 ' +
+      width +
+      " " +
+      height +
+      '" role="group" aria-label="' +
+      esc(state.name) +
+      " dividido em " +
+      state.count +
+      ' municípios">' +
+      features
+        .map(feature => {
+          const code = String(feature.properties.codarea);
+          const result = results.get(code);
+          const winner = result.rows[0];
+
+          return (
+            '<path class="municipality-shape" d="' +
+            geometryPath(feature.geometry) +
+            '" fill="' +
+            winner.color +
+            '" data-municipality="' +
+            code +
+            '" tabindex="0" role="button" aria-label="' +
+            esc(result.name) +
+            ": " +
+            esc(winner.name) +
+            ' venceu"><title>' +
+            esc(result.name) +
+            " — " +
+            esc(winner.name) +
+            "</title></path>"
+          );
+        })
+        .join("") +
+      "</svg>";
+
+    const winners = [
+      ...new Map(
+        [...results.values()].map(result => [
+          result.rows[0].name,
+          result.rows[0]
+        ])
+      ).values()
+    ];
+
+    legend.innerHTML = winners
+      .map(
+        winner =>
+          '<span class="map-legend-item"><i style="background:' +
+          winner.color +
+          '"></i>' +
+          esc(winner.name) +
+          " (" +
+          esc(winner.party) +
+          ")</span>"
+      )
+      .join("");
+
+    const showMunicipality = code => {
+      const result = results.get(code);
+
+      if (!result) {
+        return;
+      }
+
+      detail.innerHTML =
+        "<h3>" +
+        esc(result.name) +
+        " · " +
+        entry[0] +
+        '</h3><p class="state-detail-total">' +
+        result.total.toLocaleString("pt-BR") +
+        " votos simulados</p>" +
+        result.rows
+          .map(
+            row =>
+              '<div class="state-result-row"><span><i style="background:' +
+              row.color +
+              '"></i>' +
+              esc(row.name) +
+              " · " +
+              esc(row.party) +
+              "</span><strong>" +
+              row.votes.toLocaleString("pt-BR") +
+              " · " +
+              row.percent.toFixed(1).replace(".", ",") +
+              "%</strong></div>"
+          )
+          .join("");
+
+      map.querySelectorAll("[data-municipality]").forEach(path => {
+        path.classList.toggle(
+          "is-selected",
+          path.dataset.municipality === code
+        );
+      });
+    };
+
+    map.querySelectorAll(".municipality-shape").forEach(path => {
+      path.addEventListener("click", () => {
+        showMunicipality(path.dataset.municipality);
+      });
+
+      path.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          showMunicipality(path.dataset.municipality);
+        }
+      });
+    });
+
+    detail.innerHTML =
+      '<p class="empty">Mapa pronto. Clique em qualquer município para consultar os votos simulados.</p>';
+  } catch (error) {
+    map.innerHTML =
+      '<p class="empty">Não foi possível montar o mapa: ' +
+      esc(error.message) +
+      "</p>";
+    legend.innerHTML =
+      '<span class="empty">Mapa indisponível; confira a conexão e atualize.</span>';
+  }
 }

@@ -27,8 +27,7 @@
       <button class="tab" data-view="debate">03 · Debate</button>
       <button class="tab" data-view="counting">04 · Apuração</button>
       <button class="tab" data-view="stateMap">05 · Mapa presidencial</button>
-      <button class="tab" data-view="municipalMap">06 · Mapa municipal MG</button>
-      <button class="tab" data-view="rioMunicipalMap">07 · Mapa municipal RJ</button>
+      <button class="tab" data-view="municipalMap">06 · Mapa municipal</button>
     </nav>
     <section class="view active" id="setup">
       <div class="section-heading"><div><p class="eyebrow">CONFIGURAÇÃO</p><h2>Prepare a disputa</h2></div><span class="step">ETAPA 01 / 04</span></div>
@@ -76,23 +75,13 @@
       </div>
     </section>
     <section class="view" id="municipalMap">
-      <div class="section-heading"><div><p class="eyebrow">RESULTADO POR MUNICÍPIO</p><h2>Minas Gerais · 853 municípios</h2></div><span class="step" id="municipalMapRoundLabel">MAPA · AGUARDANDO</span></div>
+      <div class="section-heading"><div><p class="eyebrow">RESULTADO POR MUNICÍPIO</p><h2 id="municipalMapTitle">Mapa municipal</h2></div><span class="step" id="municipalMapRoundLabel">MAPA · AGUARDANDO</span></div>
       <div class="panel">
-        <p class="map-intro">Cada área representa um município de Minas Gerais. As cores mostram o candidato mais votado na simulação; selecione uma cidade para consultar votos e percentuais. Os resultados são fictícios, não oficiais.</p>
-        <div class="map-legend" id="municipalMapLegend"><span class="empty">Finalize a apuração para colorir os municípios.</span></div>
-        <div class="municipal-map" id="minasMunicipalMap" aria-label="Mapa de Minas Gerais dividido nos 853 municípios"></div>
-        <div class="state-detail" id="municipalDetail" aria-live="polite"><p class="empty">Os detalhes municipais aparecerão aqui.</p></div>
-        <p class="map-source">Malha municipal: IBGE · API de Malhas Territoriais · qualidade mínima.</p>
-      </div>
-    </section>
-    <section class="view" id="rioMunicipalMap">
-      <div class="section-heading"><div><p class="eyebrow">RESULTADO POR MUNICÍPIO</p><h2>Rio de Janeiro · 92 municípios</h2></div><span class="step" id="rioMunicipalMapRoundLabel">MAPA · AGUARDANDO</span></div>
-      <div class="panel">
-        <p class="map-intro">Cada área representa um município do estado do Rio de Janeiro. As cores mostram o candidato mais votado na simulação; selecione uma cidade para consultar votos e percentuais. Os resultados são fictícios, não oficiais.</p>
-        <div class="map-legend" id="rioMunicipalMapLegend"><span class="empty">Finalize a apuração para colorir os municípios.</span></div>
-        <div class="municipal-map" id="rioMunicipalMap" aria-label="Mapa do Rio de Janeiro dividido em 92 municípios"></div>
-        <div class="state-detail" id="rioMunicipalDetail" aria-live="polite"><p class="empty">Os detalhes municipais aparecerão aqui.</p></div>
-        <p class="map-source">Malha municipal: IBGE · API de Malhas Territoriais · qualidade mínima.</p>
+        <p class="map-intro">Cada área representa um município do estado selecionado. As cores mostram o candidato mais votado na simulação; selecione um município para consultar votos e percentuais. Os resultados são fictícios, não oficiais.</p>
+        <div class="map-legend" id="municipalMapLegend"><span class="empty">Finalize a apuração de governador para colorir os municípios.</span></div>
+        <div class="municipal-map" id="municipalMapCanvas" aria-label="Mapa municipal do estado selecionado"></div>
+        <div class="state-detail" id="municipalMapDetail" aria-live="polite"><p class="empty">Os detalhes municipais aparecerão aqui.</p></div>
+        <p class="map-source">Malha municipal: IBGE · API de Malhas Territoriais · qualidade mínima. Votos simulados.</p>
       </div>
     </section>
     <footer><span>URNA · Protótipo jogável</span><span>Todos os candidatos e resultados são fictícios.</span></footer>

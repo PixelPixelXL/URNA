@@ -2,8 +2,7 @@ import { getSecondRoundEligibility } from "./election.js";
 import { simulateStateResults } from "./state-results.js";
 import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
 import { getFederalDeputyCandidates2026 } from "./federal-deputy-candidates-2026.js";
-import { renderMinasMunicipalMap } from "./minas-municipal-map.js";
-import { renderRioMunicipalMap } from "./rio-municipal-map.js";
+import { renderMunicipalMap } from "./municipal-maps.js";
 (() => {
   "use strict";
 
@@ -525,12 +524,7 @@ import { renderRioMunicipalMap } from "./rio-municipal-map.js";
         $("stateMapRoundLabel").textContent = "MAPA · 2º TURNO";
         renderStateMap();
       }
-      if (state.type === "governador" && /^(mg|minas gerais)$/i.test(state.place)) {
-        renderMinasMunicipalMap({ candidates: participants, parties: state.parties, votes: state.votes, round: 2 });
-      }
-      if (state.type === "governador" && /^(rj|rio de janeiro)$/i.test(state.place)) {
-        renderRioMunicipalMap({ candidates: participants, parties: state.parties, votes: state.votes, round: 2 });
-      }
+      if (state.type === "governador") renderMunicipalMap({ place: state.place, candidates: participants, parties: state.parties, votes: state.votes, round: 2 });
       $("roundMessage").textContent = "Vencedor simulado do 2º turno: " + winner.name + " (" + (validVotes ? ((state.votes[winner.id] / validVotes) * 100).toFixed(1).replace(".", ",") : "0,0") + "% dos votos válidos).";
       return;
     }
@@ -540,12 +534,7 @@ import { renderRioMunicipalMap } from "./rio-municipal-map.js";
       $("stateMapRoundLabel").textContent = "MAPA · 1º TURNO";
       renderStateMap();
     }
-    if (state.type === "governador" && /^(mg|minas gerais)$/i.test(state.place)) {
-      renderMinasMunicipalMap({ candidates: participants, parties: state.parties, votes: state.votes, round: 1 });
-    }
-    if (state.type === "governador" && /^(rj|rio de janeiro)$/i.test(state.place)) {
-      renderRioMunicipalMap({ candidates: participants, parties: state.parties, votes: state.votes, round: 1 });
-    }
+    if (state.type === "governador") renderMunicipalMap({ place: state.place, candidates: participants, parties: state.parties, votes: state.votes, round: 1 });
     const winner = sorted[0];
     const winnerShare = validVotes ? (state.votes[winner.id] || 0) / validVotes : 0;
     if (winnerShare > 0.5) {

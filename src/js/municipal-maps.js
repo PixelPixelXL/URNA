@@ -89,8 +89,9 @@ export async function renderMunicipalMap({
   const map = $("municipalMapCanvas");
   const legend = $("municipalMapLegend");
   const detail = $("municipalMapDetail");
+  const summary = $("municipalMapSummary");
 
-  if (!state || !map || !legend || !detail) {
+  if (!state || !map || !legend || !detail || !summary) {
     return;
   }
 
@@ -98,6 +99,7 @@ export async function renderMunicipalMap({
     map.innerHTML = '<p class="empty">Não há candidatos para montar o mapa.</p>';
     legend.innerHTML = "";
     detail.innerHTML = "";
+    summary.innerHTML = "";
     return;
   }
 
@@ -392,7 +394,7 @@ export async function renderMunicipalMap({
       }))
       .sort((a, b) => b.votes - a.votes);
 
-    detail.innerHTML =
+    summary.innerHTML =
       '<h3>Resumo estadual · ' + esc(state.name) + '</h3>' +
       '<p class="state-detail-total">' +
       statewideVotes.toLocaleString("pt-BR") +

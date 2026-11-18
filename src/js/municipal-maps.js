@@ -364,8 +364,57 @@ export async function renderMunicipalMap({
       });
     });
 
+    const statewide = new Map();
+    let statewideVotes = 0;
+
+    results.forEach(result => {
+      statewideVotes += result.total;
+      result.rows.forEach((row, index) => {
+        const key = row.name + "|" + row.party;
+        const aggregate = statewide.get(key) || {
+          name: row.name,
+          party: row.party,
+          color: row.color,
+          votes: 0,
+          municipalitiesWon: 0
+        };
+
+        aggregate.votes += row.votes;
+        if (index === 0) aggregate.municipalitiesWon++;
+        statewide.set(key, aggregate);
+      });
+    });
+
+    const statewideRows = [...statewide.values()]
+      .map(row => ({
+        ...row,
+        percent: statewideVotes ? row.votes / statewideVotes * 100 : 0
+      }))
+      .sort((a, b) => b.votes - a.votes);
+
     detail.innerHTML =
-      '<p class="empty">Mapa pronto. Clique em qualquer município para consultar os votos simulados.</p>';
+      '<h3>Resumo estadual · ' + esc(state.name) + '</h3>' +
+      '<p class="state-detail-total">' +
+      statewideVotes.toLocaleString("pt-BR") +
+      ' votos simulados somados nos ' + state.count + ' municípios</p>' +
+      '<div class="municipal-summary-grid">' +
+      '<div class="municipal-summary-card"><strong>' +
+      esc(statewideRows[0].name) +
+      '</strong><span>Mais votado no total estadual</span></div>' +
+      '<div class="municipal-summary-card"><strong>' +
+      statewideRows[0].municipalitiesWon +
+      ' de ' + state.count +
+      '</strong><span>Municípios vencidos pelo líder</span></div>' +
+      '</div>' +
+      '<h4 class="municipal-summary-heading">Votação estadual simulada</h4>' +
+      statewideRows.map(row =>
+        '<div class="state-result-row"><span><i style="background:' +
+        row.color + '"></i>' + esc(row.name) + ' · ' + esc(row.party) +
+        '</span><strong>' + row.votes.toLocaleString("pt-BR") + ' · ' +
+        row.percent.toFixed(1).replace(".", ",") + '% · ' +
+        row.municipalitiesWon + ' municípios</strong></div>'
+      ).join("") +
+      '<p class="municipal-summary-note">Os totais acima agregam os votos fictícios gerados para cada município. Clique no mapa para abrir o detalhamento local.</p>';
   } catch (error) {
     map.innerHTML =
       '<p class="empty">Não foi possível montar o mapa: ' +

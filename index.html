@@ -28,6 +28,7 @@
       <button class="tab" data-view="counting">04 · Apuração</button>
       <button class="tab" data-view="stateMap">05 · Mapa presidencial</button>
       <button class="tab" data-view="municipalMap">06 · Mapa municipal</button>
+      <button class="tab" data-view="abroadVoting">07 · Voto no exterior</button>
     </nav>
     <section class="view active" id="setup">
       <div class="section-heading"><div><p class="eyebrow">CONFIGURAÇÃO</p><h2>Prepare a disputa</h2></div><span class="step">ETAPA 01 / 04</span></div>
@@ -83,6 +84,23 @@
         <div class="municipal-map" id="municipalMapCanvas" aria-label="Mapa municipal do estado selecionado"></div>
         <div class="state-detail" id="municipalMapDetail" aria-live="polite"><p class="empty">Os detalhes municipais aparecerão aqui.</p></div>
         <p class="map-source">Malha municipal: IBGE · API de Malhas Territoriais · qualidade mínima. Votos simulados.</p>
+      </div>
+    </section>
+    <section class="view" id="abroadVoting">
+      <div class="section-heading"><div><p class="eyebrow">ELEIÇÃO PRESIDENCIAL</p><h2>Voto brasileiro no exterior</h2></div><span class="step">MÓDULO INTERNACIONAL</span></div>
+      <div class="panel">
+        <p class="map-intro">Simule a votação de brasileiros residentes no exterior. Na eleição brasileira real, o voto no exterior é destinado à escolha de presidente e vice-presidente. Os números gerados aqui são fictícios e servem apenas para o simulador.</p>
+        <div class="abroad-controls">
+          <label for="abroadCountries">Países incluídos<select id="abroadCountries" multiple size="6">
+            <option value="Portugal" selected>Portugal</option><option value="Estados Unidos" selected>Estados Unidos</option><option value="Japão" selected>Japão</option><option value="Reino Unido" selected>Reino Unido</option><option value="Alemanha" selected>Alemanha</option><option value="França" selected>França</option><option value="Espanha" selected>Espanha</option><option value="Itália" selected>Itália</option><option value="Canadá" selected>Canadá</option><option value="Argentina" selected>Argentina</option><option value="Suíça">Suíça</option><option value="Austrália">Austrália</option>
+          </select><small>Use Ctrl (ou toque, no celular, conforme o navegador) para selecionar mais de um país.</small></label>
+          <label for="abroadElectorate">Eleitorado total simulado<input id="abroadElectorate" type="number" min="1000" max="5000000" step="1000" value="500000"></label>
+        </div>
+        <button class="primary" id="runAbroadCount">Simular votação no exterior →</button>
+        <div class="abroad-summary" id="abroadSummary"><p class="empty">Configure os países e inicie a simulação para ver os resultados.</p></div>
+        <div class="list-heading"><h3>Resultado por país</h3><span id="abroadCountryCount">0 países</span></div>
+        <div class="abroad-results" id="abroadResults"><p class="empty">A votação no exterior ainda não foi simulada.</p></div>
+        <p class="map-source">Simulação fictícia. Não representa dados oficiais do TSE nem distribuição real do eleitorado brasileiro no exterior.</p>
       </div>
     </section>
     <footer><span>URNA · Protótipo jogável</span><span>Todos os candidatos e resultados são fictícios.</span></footer>

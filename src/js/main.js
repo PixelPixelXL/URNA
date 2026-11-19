@@ -178,7 +178,59 @@ import { renderMunicipalMap } from "./municipal-maps.js";
 
     if (state.catalogMode) {
       if (state.type === "presidencial" && state.year === 2026) {
-        loadPresidential2026Preset();
+        function runAbroadVoting() {
+    if (state.type !== "presidencial") {
+      toast("O voto no exterior está disponível somente no modo presidencial.");
+      return;
+    }
+    if (!state.candidates.length) {
+      toast("Cadastre candidatos antes de simular a votação.");
+      return;
+    }
+    const select = $("abroadCountries");
+    const countries = [...select.selectedOptions].map(option => option.value);
+    if (!countries.length) {
+      toast("Selecione pelo menos um país.");
+      return;
+    }
+    const requestedTotal = Math.min(5000000, Math.max(1000, Number($("abroadElectorate").value) || 500000));
+    const electorateByCountry = allocateVotes(requestedTotal, countries.map((_, index) => countries.length - index));
+    const totals = Object.fromEntries(state.candidates.map(candidate => [candidate.id, 0]));
+    const rows = countries.map((country, index) => {
+      const electorate = electorateByCountry[index];
+      const turnout = 0.55 + Math.random() * 0.35;
+      const validVotes = Math.floor(electorate * turnout);
+      const weights = state.candidates.map(() => 0.2 + Math.random());
+      const votes = allocateVotes(validVotes, weights);
+      const results = state.candidates.map((candidate, candidateIndex) => {
+        const count = votes[candidateIndex];
+        totals[candidate.id] += count;
+        const party = state.parties.find(item => item.id === candidate.partyId);
+        return { name: candidate.name, party: party ? party.acronym : "IND", votes: count, percent: validVotes ? count / validVotes * 100 : 0 };
+      }).sort((a, b) => b.votes - a.votes);
+      return { country, electorate, validVotes, results };
+    });
+    const totalVotes = Object.values(totals).reduce((sum, value) => sum + value, 0);
+    const overall = state.candidates.map(candidate => {
+      const party = state.parties.find(item => item.id === candidate.partyId);
+      const votes = totals[candidate.id] || 0;
+      return { name: candidate.name, party: party ? party.acronym : "IND", votes, percent: totalVotes ? votes / totalVotes * 100 : 0 };
+    }).sort((a, b) => b.votes - a.votes);
+    $("abroadSummary").innerHTML = '<div class="abroad-summary-grid"><div class="municipal-summary-card"><strong>' + totalVotes.toLocaleString("pt-BR") + '</strong><span>VOTOS VÁLIDOS SIMULADOS</span></div><div class="municipal-summary-card"><strong>' + countries.length + '</strong><span>PAÍSES INCLUÍDOS</span></div><div class="municipal-summary-card"><strong>' + (overall[0]?.name || "—") + '</strong><span>MAIS VOTADO NO EXTERIOR</span></div></div><h3 class="municipal-summary-heading">Totalização mundial no exterior</h3>' + overall.map(item => '<div class="abroad-result-row"><span><strong>' + escapeHtml(item.name) + '</strong><small>' + escapeHtml(item.party) + '</small></span><b>' + item.votes.toLocaleString("pt-BR") + ' · ' + item.percent.toFixed(1).replace(".", ",") + '%</b></div>').join("");
+    $("abroadCountryCount").textContent = countries.length + (countries.length === 1 ? " país" : " países");
+    $("abroadResults").innerHTML = rows.map(row => '<details class="abroad-country"><summary><strong>' + escapeHtml(row.country) + '</strong><span>' + row.validVotes.toLocaleString("pt-BR") + ' votos válidos</span></summary>' + row.results.map(item => '<div class="abroad-result-row"><span>' + escapeHtml(item.name) + '<small>' + escapeHtml(item.party) + '</small></span><b>' + item.votes.toLocaleString("pt-BR") + ' · ' + item.percent.toFixed(1).replace(".", ",") + '%</b></div>').join("") + '</details>').join("");
+    toast("Votação no exterior simulada!");
+  }
+
+  $("runAbroadCount").addEventListener("click", runAbroadVoting);
+  document.querySelectorAll('input[name="electionType"]').forEach(input => {
+    input.addEventListener("change", () => {
+      $("runAbroadCount").disabled = input.value !== "presidencial";
+      $("abroadSummary").innerHTML = input.value === "presidencial" ? '<p class="empty">Configure os países e inicie a simulação para ver os resultados.</p>' : '<p class="empty">Este módulo funciona apenas para eleições presidenciais.</p>';
+    });
+  });
+
+  loadPresidential2026Preset();
       } else if (state.type === "deputado-federal" && state.year === 2026) {
         state.place = "Brasil";
         const federalCatalog = getFederalDeputyCandidates2026();

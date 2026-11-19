@@ -37,3 +37,14 @@ Todos os resultados são aleatórios e fictícios. Não representam pesquisas, p
 
 ### Catálogo de deputados federais (2026)
 O modo **Deputado federal** carrega 705 candidatos da lista fornecida pelo usuário, com nome, partido e número de urna. A interface apresenta todos em uma única categoria nacional chamada “Deputados Federais do Brasil”, sem filtros ou separação por UF. A lista de origem está identificada como Minas Gerais (MG); portanto, o rótulo nacional é uma organização da simulação e não significa que o arquivo contenha candidaturas de todas as unidades federativas. A apuração é fictícia e não utiliza segundo turno.
+
+
+## TypeScript
+O projeto está iniciando a adoção gradual de TypeScript. Os tipos compartilhados ficam em `src/ts/models.ts`; o código JavaScript atual continua sendo executado normalmente no navegador.
+
+Para instalar a ferramenta de desenvolvimento e validar os tipos:
+```bash
+npm install
+npm run typecheck
+```
+A migração dos módulos existentes será feita aos poucos, sem trocar toda a aplicação de uma vez.

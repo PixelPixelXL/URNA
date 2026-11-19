@@ -40,11 +40,15 @@ O modo **Deputado federal** carrega 705 candidatos da lista fornecida pelo usuá
 
 
 ## TypeScript
-O projeto está iniciando a adoção gradual de TypeScript. Os tipos compartilhados ficam em `src/ts/models.ts`; o código JavaScript atual continua sendo executado normalmente no navegador.
+A migração gradual começou pelo módulo de regras eleitorais:
+- `src/ts/election.ts`: fonte TypeScript das regras de eleição e distribuição de votos.
+- `src/js/election.js`: saída JavaScript usada pelo navegador; mantenha-a sincronizada compilando o TypeScript.
+- `src/ts/models.ts`: tipos compartilhados de candidatos, partidos, eleições e resultados.
 
-Para instalar a ferramenta de desenvolvimento e validar os tipos:
+Para instalar as ferramentas, compilar o TypeScript e validar os tipos:
 ```bash
 npm install
+npm run build
 npm run typecheck
 ```
-A migração dos módulos existentes será feita aos poucos, sem trocar toda a aplicação de uma vez.
+O navegador continua carregando JavaScript. A compilação gera os arquivos em `src/js/`, então a migração não exige que o navegador execute arquivos TypeScript diretamente.

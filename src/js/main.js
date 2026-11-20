@@ -180,6 +180,7 @@ import { renderMunicipalMap } from "./municipal-maps.js";
       if (state.type === "presidencial" && state.year === 2026) {
         let abroadMap = null;
   let abroadCountriesLayer = null;
+  let abroadCountryNames = [];
 
   function initAbroadMap() {
     const container = $("abroadWorldMap");
@@ -192,7 +193,6 @@ import { renderMunicipalMap } from "./municipal-maps.js";
       maxZoom: 6
     }).setView([18, 5], 1.35);
 
-    const selectedValues = () => [...$("abroadCountries").selectedOptions].map(option => option.value);
     const aliases = {
       "United States of America": "Estados Unidos",
       "United States": "Estados Unidos",
@@ -214,20 +214,16 @@ import { renderMunicipalMap } from "./municipal-maps.js";
       color: "#526783",
       weight: 0.7,
       opacity: 0.9,
-      fillColor: selectedValues().includes(displayName(feature)) ? "#3f91e8" : "#243b5b",
-      fillOpacity: selectedValues().includes(displayName(feature)) ? 0.88 : 0.72
+      fillColor: "#3f91e8",
+      fillOpacity: 0.82
     });
-    const refresh = () => {
-      if (abroadCountriesLayer) abroadCountriesLayer.setStyle(styleCountry);
-    };
-    $("abroadCountries").addEventListener("change", refresh);
-
     fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson")
       .then(response => {
         if (!response.ok) throw new Error("Falha ao carregar os países");
         return response.json();
       })
       .then(geojson => {
+        abroadCountryNames = [...new Set(geojson.features.map(displayName))].sort((a, b) => a.localeCompare(b, "pt-BR"));
         abroadCountriesLayer = L.geoJSON(geojson, {
           style: styleCountry,
           onEachFeature: (feature, layer) => {
@@ -235,26 +231,15 @@ import { renderMunicipalMap } from "./municipal-maps.js";
             layer.bindTooltip(name, { sticky: true, direction: "top" });
             layer.on({
               mouseover: event => event.target.setStyle({ weight: 1.5, color: "#e8f3ff", fillOpacity: 1 }),
-              mouseout: () => refresh(),
+              mouseout: () => layer.setStyle(styleCountry(feature)),
               click: () => {
-                const select = $("abroadCountries");
-                let option = [...select.options].find(item => item.value === name);
-                if (!option) {
-                  option = document.createElement("option");
-                  option.value = name;
-                  option.textContent = name;
-                  select.appendChild(option);
-                }
-                option.selected = !option.selected;
-                select.dispatchEvent(new Event("change", { bubbles: true }));
-                $("abroadMapStatus").textContent = selectedValues().length + " países selecionados";
+                $("abroadMapStatus").textContent = name + " — participa da simulação junto com todos os demais países.";
               }
             });
           }
         }).addTo(abroadMap);
-        $("abroadMapStatus").textContent = "Clique em qualquer país para selecionar. Azul = incluído na simulação.";
+        $("abroadMapStatus").textContent = abroadCountryNames.length + " países e territórios carregados. Todos participam automaticamente da simulação.";
         abroadMap.fitWorld();
-        refresh();
       })
       .catch(() => {
         $("abroadMapStatus").textContent = "Não foi possível carregar o mapa. Verifique a conexão e recarregue a página.";
@@ -274,14 +259,13 @@ import { renderMunicipalMap } from "./municipal-maps.js";
       toast("Cadastre candidatos antes de simular a votação.");
       return;
     }
-    const select = $("abroadCountries");
-    const countries = [...select.selectedOptions].map(option => option.value);
+    const countries = abroadCountryNames;
     if (!countries.length) {
-      toast("Selecione pelo menos um país.");
+      toast("O mapa ainda está carregando. Aguarde alguns segundos e tente novamente.");
       return;
     }
     const requestedTotal = Math.min(5000000, Math.max(1000, Number($("abroadElectorate").value) || 500000));
-    const electorateByCountry = allocateVotes(requestedTotal, countries.map((_, index) => countries.length - index));
+    const electorateByCountry = allocateVotes(requestedTotal, countries.map(() => 1));
     const totals = Object.fromEntries(state.candidates.map(candidate => [candidate.id, 0]));
     const rows = countries.map((country, index) => {
       const electorate = electorateByCountry[index];

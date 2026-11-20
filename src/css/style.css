@@ -596,3 +596,14 @@ footer {
 
 /* Votação de brasileiros no exterior */
 .abroad-controls{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin:18px 0}.abroad-controls label{display:flex;flex-direction:column;gap:8px;color:#dce6f7;font-size:13px}.abroad-controls select,.abroad-controls input{width:100%;background:#111e33;color:#edf4ff;border:1px solid var(--line);border-radius:9px;padding:10px}.abroad-controls select[multiple]{min-height:150px}.abroad-controls small{color:var(--muted);font-size:11px;line-height:1.5}.abroad-summary{margin-top:22px}.abroad-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}.abroad-result-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 12px;border-bottom:1px solid var(--line);font-size:12px}.abroad-result-row span{min-width:0}.abroad-result-row small{display:block;color:var(--muted);margin-top:3px}.abroad-result-row b{text-align:right;white-space:nowrap}.abroad-country{background:#17243b;border:1px solid var(--line);border-radius:10px;margin:10px 0;padding:0 12px}.abroad-country summary{display:flex;justify-content:space-between;gap:10px;cursor:pointer;padding:14px 0;color:#edf4ff;font-size:13px}.abroad-country summary span{color:var(--muted);font-size:11px;text-align:right}.abroad-country .abroad-result-row{padding-left:4px;padding-right:4px}@media(max-width:600px){.abroad-controls,.abroad-summary-grid{grid-template-columns:1fr}.abroad-result-row{font-size:11px}}
+
+
+/* Mapa-múndi do voto no exterior */
+.abroad-map-heading{display:flex;flex-direction:column;gap:5px;margin:20px 0 10px;color:#edf4ff;font-size:14px}
+.abroad-map-heading span,.abroad-map-status{color:var(--muted);font-size:11px;line-height:1.5}
+.abroad-world-map{height:440px;width:100%;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#101e34;z-index:0}
+.abroad-world-map .leaflet-container{height:100%;width:100%;background:#101e34;font:inherit}
+.abroad-world-map .leaflet-control-zoom a{background:#172943;color:#edf4ff;border-color:#526783}
+.abroad-world-map .leaflet-tooltip{background:#101c35;color:#f3f7ff;border:1px solid #526783;box-shadow:none}
+.abroad-map-status{margin:8px 0 14px}
+@media(max-width:600px){.abroad-world-map{height:310px}.abroad-map-heading{font-size:13px}}

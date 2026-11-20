@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101c35">
   <title>URNA — Simulador Eleitoral</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="src/css/style.css">
 </head>
 <body>
@@ -90,6 +91,9 @@
       <div class="section-heading"><div><p class="eyebrow">ELEIÇÃO PRESIDENCIAL</p><h2>Voto brasileiro no exterior</h2></div><span class="step">MÓDULO INTERNACIONAL</span></div>
       <div class="panel">
         <p class="map-intro">Simule a votação de brasileiros residentes no exterior. Na eleição brasileira real, o voto no exterior é destinado à escolha de presidente e vice-presidente. Os números gerados aqui são fictícios e servem apenas para o simulador.</p>
+        <div class="abroad-map-heading"><strong>Mapa-múndi interativo</strong><span>Clique nos países para incluí-los ou removê-los da simulação.</span></div>
+        <div id="abroadWorldMap" class="abroad-world-map" role="application" aria-label="Mapa-múndi para selecionar países"></div>
+        <p id="abroadMapStatus" class="abroad-map-status" aria-live="polite">Carregando mapa-múndi…</p>
         <div class="abroad-controls">
           <label for="abroadCountries">Países incluídos<select id="abroadCountries" multiple size="6">
             <option value="Portugal" selected>Portugal</option><option value="Estados Unidos" selected>Estados Unidos</option><option value="Japão" selected>Japão</option><option value="Reino Unido" selected>Reino Unido</option><option value="Alemanha" selected>Alemanha</option><option value="França" selected>França</option><option value="Espanha" selected>Espanha</option><option value="Itália" selected>Itália</option><option value="Canadá" selected>Canadá</option><option value="Argentina" selected>Argentina</option><option value="Suíça">Suíça</option><option value="Austrália">Austrália</option>
@@ -106,6 +110,7 @@
     <footer><span>URNA · Protótipo jogável</span><span>Todos os candidatos e resultados são fictícios.</span></footer>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script type="module" src="src/js/main.js"></script>
 </body>
 </html>

@@ -178,7 +178,94 @@ import { renderMunicipalMap } from "./municipal-maps.js";
 
     if (state.catalogMode) {
       if (state.type === "presidencial" && state.year === 2026) {
-        function runAbroadVoting() {
+        let abroadMap = null;
+  let abroadCountriesLayer = null;
+
+  function initAbroadMap() {
+    const container = $("abroadWorldMap");
+    if (!container || !window.L || abroadMap) return;
+    abroadMap = L.map(container, {
+      zoomControl: true,
+      scrollWheelZoom: false,
+      worldCopyJump: true,
+      minZoom: 1,
+      maxZoom: 6
+    }).setView([18, 5], 1.35);
+
+    const selectedValues = () => [...$("abroadCountries").selectedOptions].map(option => option.value);
+    const aliases = {
+      "United States of America": "Estados Unidos",
+      "United States": "Estados Unidos",
+      "United Kingdom": "Reino Unido",
+      "Russian Federation": "Rússia",
+      "South Korea": "Coreia do Sul",
+      "North Korea": "Coreia do Norte",
+      "Türkiye": "Turquia",
+      "Czechia": "Tchéquia",
+      "Ivory Coast": "Costa do Marfim",
+      "Côte d'Ivoire": "Costa do Marfim"
+    };
+    const displayName = feature => {
+      const properties = feature.properties || {};
+      const name = properties.ADMIN || properties.name || properties.NAME || "País";
+      return aliases[name] || name;
+    };
+    const styleCountry = feature => ({
+      color: "#526783",
+      weight: 0.7,
+      opacity: 0.9,
+      fillColor: selectedValues().includes(displayName(feature)) ? "#3f91e8" : "#243b5b",
+      fillOpacity: selectedValues().includes(displayName(feature)) ? 0.88 : 0.72
+    });
+    const refresh = () => {
+      if (abroadCountriesLayer) abroadCountriesLayer.setStyle(styleCountry);
+    };
+    $("abroadCountries").addEventListener("change", refresh);
+
+    fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson")
+      .then(response => {
+        if (!response.ok) throw new Error("Falha ao carregar os países");
+        return response.json();
+      })
+      .then(geojson => {
+        abroadCountriesLayer = L.geoJSON(geojson, {
+          style: styleCountry,
+          onEachFeature: (feature, layer) => {
+            const name = displayName(feature);
+            layer.bindTooltip(name, { sticky: true, direction: "top" });
+            layer.on({
+              mouseover: event => event.target.setStyle({ weight: 1.5, color: "#e8f3ff", fillOpacity: 1 }),
+              mouseout: () => refresh(),
+              click: () => {
+                const select = $("abroadCountries");
+                let option = [...select.options].find(item => item.value === name);
+                if (!option) {
+                  option = document.createElement("option");
+                  option.value = name;
+                  option.textContent = name;
+                  select.appendChild(option);
+                }
+                option.selected = !option.selected;
+                select.dispatchEvent(new Event("change", { bubbles: true }));
+                $("abroadMapStatus").textContent = selectedValues().length + " países selecionados";
+              }
+            });
+          }
+        }).addTo(abroadMap);
+        $("abroadMapStatus").textContent = "Clique em qualquer país para selecionar. Azul = incluído na simulação.";
+        abroadMap.fitWorld();
+        refresh();
+      })
+      .catch(() => {
+        $("abroadMapStatus").textContent = "Não foi possível carregar o mapa. Verifique a conexão e recarregue a página.";
+      });
+
+    document.querySelector('[data-view="abroadVoting"]')?.addEventListener("click", () => {
+      requestAnimationFrame(() => abroadMap && abroadMap.invalidateSize());
+    });
+  }
+
+  function runAbroadVoting() {
     if (state.type !== "presidencial") {
       toast("O voto no exterior está disponível somente no modo presidencial.");
       return;
@@ -222,6 +309,7 @@ import { renderMunicipalMap } from "./municipal-maps.js";
     toast("Votação no exterior simulada!");
   }
 
+  initAbroadMap();
   $("runAbroadCount").addEventListener("click", runAbroadVoting);
   document.querySelectorAll('input[name="electionType"]').forEach(input => {
     input.addEventListener("change", () => {

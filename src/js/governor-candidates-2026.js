@@ -20,7 +20,8 @@ const STATES = {
   SC: ["Santa Catarina", ["santa catarina", "sc"]],
   PR: ["Paraná", ["parana", "pr"]],
   AM: ["Amazonas", ["amazonas", "am"]],
-  AC: ["Acre", ["acre", "ac"]]
+  AC: ["Acre", ["acre", "ac"]],
+  AP: ["Amapá", ["amapa", "ap"]]
 };
 
 const PARTY_COLORS = {
@@ -224,6 +225,13 @@ const CANDIDATES = {
     ["Mailza Assis", "PP", "11"],
     ["Thor Dantas", "PSB", "40"],
     ["Tião Bocalom", "PSDB", "45"]
+  ],
+  AP: [
+    ["Carlos Cley", "PSTU", "16"],
+    ["Clécio", "UNIÃO", "44"],
+    ["Delegado Marcos", "DC", "27"],
+    ["Dr. Furlan", "PSD", "55"],
+    ["Jairo Palheta", "PCO", "29"]
   ]
 };
 

@@ -18,7 +18,9 @@ const STATES = {
   ES: ["Espírito Santo", ["espirito santo", "es"]],
   RS: ["Rio Grande do Sul", ["rio grande do sul", "rs"]],
   SC: ["Santa Catarina", ["santa catarina", "sc"]],
-  PR: ["Paraná", ["parana", "pr"]]
+  PR: ["Paraná", ["parana", "pr"]],
+  AM: ["Amazonas", ["amazonas", "am"]],
+  AC: ["Acre", ["acre", "ac"]]
 };
 
 const PARTY_COLORS = {
@@ -205,6 +207,23 @@ const CANDIDATES = {
     ["Sandro Alex", "PSD", "55"],
     ["Sergio Moro", "PL", "22"],
     ["Tayná Miessa", "UP", "80"]
+  ],
+  AM: [
+    ["Cabo Daciolo", "MOB", "33"],
+    ["David Almeida", "AVANTE", "70"],
+    ["Gilberto Vasconcelos", "PSTU", "16"],
+    ["Isael Munduruku", "REDE", "18"],
+    ["Omar Aziz", "PSD", "55"],
+    ["Professora Maria do Carmo", "PL", "22"],
+    ["Roberto Cidade", "UNIÃO", "44"]
+  ],
+  AC: [
+    ["Alan Rick", "REP", "10"],
+    ["Dr. Luisinho", "AGIR", "36"],
+    ["Eudo Raffael", "PCB", "21"],
+    ["Mailza Assis", "PP", "11"],
+    ["Thor Dantas", "PSB", "40"],
+    ["Tião Bocalom", "PSDB", "45"]
   ]
 };
 

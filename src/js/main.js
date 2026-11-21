@@ -648,8 +648,8 @@ import { renderPresidentialMunicipalMap } from "./municipal-maps.js";
         state.stateMapResults = simulateStateResults(participants, state.parties, state.votes);
         $("stateMapRoundLabel").textContent = "MAPA · 2º TURNO";
         renderStateMap();
+        renderPresidentialMunicipalMap({ candidates: participants, parties: state.parties, votes: state.votes, round: 2 });
       }
-              renderPresidentialMunicipalMap({ candidates: participants, parties: state.parties, votes: state.votes, round: 2 });
       if (state.type === "governador") renderMunicipalMap({ place: state.place, candidates: participants, parties: state.parties, votes: state.votes, round: 2 });
       $("roundMessage").textContent = "Vencedor simulado do 2º turno: " + winner.name + " (" + (validVotes ? ((state.votes[winner.id] / validVotes) * 100).toFixed(1).replace(".", ",") : "0,0") + "% dos votos válidos).";
       return;
@@ -659,6 +659,7 @@ import { renderPresidentialMunicipalMap } from "./municipal-maps.js";
       state.stateMapResults = simulateStateResults(participants, state.parties, state.votes);
       $("stateMapRoundLabel").textContent = "MAPA · 1º TURNO";
       renderStateMap();
+      renderPresidentialMunicipalMap({ candidates: participants, parties: state.parties, votes: state.votes, round: 1 });
     }
     if (state.type === "governador") renderMunicipalMap({ place: state.place, candidates: participants, parties: state.parties, votes: state.votes, round: 1 });
     const winner = sorted[0];

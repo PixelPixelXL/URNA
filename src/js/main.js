@@ -3,6 +3,7 @@ import { simulateStateResults } from "./state-results.js";
 import { getGovernorCandidates2026 } from "./governor-candidates-2026.js";
 import { getFederalDeputyCandidates2026 } from "./federal-deputy-candidates-2026.js";
 import { renderMunicipalMap } from "./municipal-maps.js";
+import { renderPresidentialMunicipalMap } from "./municipal-maps.js";
 (() => {
   "use strict";
 
@@ -648,6 +649,7 @@ import { renderMunicipalMap } from "./municipal-maps.js";
         $("stateMapRoundLabel").textContent = "MAPA · 2º TURNO";
         renderStateMap();
       }
+              renderPresidentialMunicipalMap({ candidates: participants, parties: state.parties, votes: state.votes, round: 2 });
       if (state.type === "governador") renderMunicipalMap({ place: state.place, candidates: participants, parties: state.parties, votes: state.votes, round: 2 });
       $("roundMessage").textContent = "Vencedor simulado do 2º turno: " + winner.name + " (" + (validVotes ? ((state.votes[winner.id] / validVotes) * 100).toFixed(1).replace(".", ",") : "0,0") + "% dos votos válidos).";
       return;

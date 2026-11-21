@@ -448,3 +448,68 @@ export async function renderMunicipalMap({
       '<span class="empty">Mapa indisponível; confira a conexão e atualize.</span>';
   }
 }
+
+
+export async function renderPresidentialMunicipalMap({ candidates, parties, votes, round }) {
+  const map=$("municipalMapCanvas"), legend=$("municipalMapLegend"), detail=$("municipalMapDetail"), summary=$("municipalMapSummary");
+  if(!map||!legend||!detail||!summary||!candidates?.length)return;
+  $("municipalMapTitle").textContent="Brasil · mapa presidencial por município";
+  $("municipalMapRoundLabel").textContent="MAPA · "+round+"º TURNO";
+  map.innerHTML='<p class="empty">Carregando os municípios brasileiros pelo IBGE…</p>';
+  legend.innerHTML=""; detail.innerHTML=""; summary.innerHTML="";
+  try {
+    const groups=await Promise.all(Object.entries(STATES).map(async ([uf,state])=>{
+      const base="https://servicodados.ibge.gov.br/api/";
+      const [gr,nr]=await Promise.all([
+        fetch(base+"v3/malhas/estados/"+state.code+"?formato=application/vnd.geo+json&qualidade=minima&intrarregiao=municipio"),
+        fetch(base+"v1/localidades/estados/"+state.code+"/municipios")
+      ]);
+      if(!gr.ok||!nr.ok)throw Error("Falha ao consultar a malha do IBGE ("+uf+").");
+      const [geo,names]=await Promise.all([gr.json(),nr.json()]);
+      const nameMap=new Map(names.map(x=>[String(x.id),x.nome]));
+      const fs=(geo.features||[]).filter(f=>f.geometry&&f.properties?.codarea);
+      if(fs.length!==state.count)throw Error(uf+": quantidade de municípios inesperada ("+fs.length+").");
+      return fs.map(f=>({uf,code:String(f.properties.codarea),name:nameMap.get(String(f.properties.codarea))||"Município",geometry:f.geometry}));
+    }));
+    const features=groups.flat(), results=new Map();
+    for(const f of features){
+      const weights=candidates.map(c=>Math.max(.01,(Number(votes[c.id])||0)*(.62+(hash(f.code+c.id)%7600)/10000)));
+      const total=1800+(hash(f.code+"turnout")%68000), allocated=allocate(total,weights);
+      const rows=candidates.map((c,i)=>{const p=parties.find(x=>x.id===c.partyId);return {id:c.id,name:c.name,party:p?.acronym||"IND",color:p?.color||"#718096",votes:allocated[i],percent:allocated[i]/total*100};}).sort((a,b)=>b.votes-a.votes);
+      results.set(f.code,{...f,total,rows});
+    }
+    const points=[];
+    features.forEach(f=>rings(f.geometry).forEach(poly=>(poly[0]||[]).forEach(p=>points.push(p))));
+    if(!points.length)throw Error("Malha sem coordenadas.");
+    const project=([lon,lat])=>[lon*Math.cos(-14*Math.PI/180),lat];
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    points.forEach(p=>{const [x,y]=project(p);minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);});
+    const W=1000,H=1050,pad=14,scale=Math.min((W-2*pad)/(maxX-minX),(H-2*pad)/(maxY-minY));
+    const ox=(W-(maxX-minX)*scale)/2,oy=(H-(maxY-minY)*scale)/2;
+    const xy=p=>{const [x,y]=project(p);return [ox+(x-minX)*scale,H-oy-(y-minY)*scale];};
+    const ringPath=r=>r.map((p,i)=>{const [x,y]=xy(p);return (i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1);}).join(" ")+" Z";
+    const geomPath=g=>rings(g).map(poly=>poly.map(ringPath).join(" ")).join(" ");
+    map.innerHTML='<svg viewBox="0 0 '+W+" "+H+'" role="group" aria-label="Brasil dividido em municípios">'+features.map(f=>{
+      const r=results.get(f.code),w=r.rows[0];
+      return '<path class="municipality-shape" d="'+geomPath(f.geometry)+'" fill="'+w.color+'" data-municipality="'+f.code+'" tabindex="0" role="button" aria-label="'+esc(r.name)+" ("+f.uf+"): "+esc(w.name)+' venceu"><title>'+esc(r.name)+" ("+f.uf+") — "+esc(w.name)+"</title></path>";
+    }).join("")+"</svg>";
+    const winners=[...new Map([...results.values()].map(r=>[r.rows[0].id,r.rows[0]])).values()];
+    legend.innerHTML=winners.map(w=>'<span class="map-legend-item"><i style="background:'+w.color+'"></i>'+esc(w.name)+" ("+esc(w.party)+")</span>").join("");
+    const show=code=>{
+      const r=results.get(code);if(!r)return;
+      detail.innerHTML="<h3>"+esc(r.name)+" · "+r.uf+"</h3><p class=\"state-detail-total\">"+r.total.toLocaleString("pt-BR")+" votos simulados</p>"+r.rows.map(x=>'<div class="state-result-row"><span><i style="background:'+x.color+'"></i>'+esc(x.name)+" · "+esc(x.party)+"</span><strong>"+x.votes.toLocaleString("pt-BR")+" · "+x.percent.toFixed(1).replace(".",",")+"%</strong></div>").join("");
+      map.querySelectorAll("[data-municipality]").forEach(p=>p.classList.toggle("is-selected",p.dataset.municipality===code));
+    };
+    map.querySelectorAll(".municipality-shape").forEach(p=>{
+      p.addEventListener("click",()=>show(p.dataset.municipality));
+      p.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();show(p.dataset.municipality);}});
+    });
+    const totals=new Map();let allVotes=0;
+    results.forEach(r=>{allVotes+=r.total;r.rows.forEach((x,i)=>{const a=totals.get(x.id)||{...x,votes:0,municipalitiesWon:0};a.votes+=x.votes;if(i===0)a.municipalitiesWon++;totals.set(x.id,a);});});
+    const rows=[...totals.values()].map(x=>({...x,percent:x.votes/allVotes*100})).sort((a,b)=>b.votes-a.votes);
+    summary.innerHTML="<h3>Resumo nacional · "+features.length.toLocaleString("pt-BR")+" municípios</h3><p class=\"state-detail-total\">"+allVotes.toLocaleString("pt-BR")+" votos simulados</p>"+rows.map(x=>'<div class="state-result-row"><span><i style="background:'+x.color+'"></i>'+esc(x.name)+" · "+esc(x.party)+"</span><strong>"+x.votes.toLocaleString("pt-BR")+" · "+x.percent.toFixed(1).replace(".",",")+"% · "+x.municipalitiesWon+" municípios</strong></div>").join("")+'<p class="municipal-summary-note">Distribuição municipal fictícia derivada dos totais nacionais simulados. Não representa resultados oficiais.</p>';
+  } catch(e) {
+    map.innerHTML='<p class="empty">Não foi possível montar o mapa nacional: '+esc(e.message)+"</p>";
+    legend.innerHTML='<span class="empty">Mapa indisponível; confira a conexão e atualize.</span>';
+  }
+}

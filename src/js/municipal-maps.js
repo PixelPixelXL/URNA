@@ -467,9 +467,25 @@ export async function renderPresidentialMunicipalMap({ candidates, parties, vote
       if(!gr.ok||!nr.ok)throw Error("Falha ao consultar a malha do IBGE ("+uf+").");
       const [geo,names]=await Promise.all([gr.json(),nr.json()]);
       const nameMap=new Map(names.map(x=>[String(x.id),x.nome]));
-      const fs=(geo.features||[]).filter(f=>f.geometry&&f.properties?.codarea);
-      if(fs.length!==state.count)throw Error(uf+": quantidade de municípios inesperada ("+fs.length+").");
-      return fs.map(f=>({uf,code:String(f.properties.codarea),name:nameMap.get(String(f.properties.codarea))||"Município",geometry:f.geometry}));
+      const geometryByCode=new Map((geo.features||[])
+        .filter(f=>f.geometry&&f.properties?.codarea)
+        .map(f=>[String(f.properties.codarea),f.geometry]));
+      const missing=names.filter(item=>!geometryByCode.has(String(item.id)));
+      if(missing.length){
+        const recovered=await Promise.all(missing.map(async item=>{
+          const response=await fetch(base+"v3/malhas/municipios/"+item.id+"?formato=application/vnd.geo+json&qualidade=minima");
+          if(!response.ok)return null;
+          const feature=await response.json();
+          return feature?.geometry ? [String(item.id),feature.geometry] : null;
+        }));
+        recovered.filter(Boolean).forEach(([code,geometry])=>geometryByCode.set(code,geometry));
+      }
+      const features=names.filter(item=>geometryByCode.has(String(item.id)));
+      if(features.length!==names.length){
+        const absent=names.filter(item=>!geometryByCode.has(String(item.id))).map(item=>item.nome);
+        throw Error(uf+": não foi possível obter a geometria de "+absent.length+" município(s): "+absent.join(", ")+".");
+      }
+      return features.map(item=>({uf,code:String(item.id),name:item.nome,geometry:geometryByCode.get(String(item.id))}));
     }));
     const features=groups.flat(), results=new Map();
     for(const f of features){

@@ -21,7 +21,8 @@ const STATES = {
   PR: ["Paraná", ["parana", "pr"]],
   AM: ["Amazonas", ["amazonas", "am"]],
   AC: ["Acre", ["acre", "ac"]],
-  AP: ["Amapá", ["amapa", "ap"]]
+  AP: ["Amapá", ["amapa", "ap"]],
+  PA: ["Pará", ["para", "pa"]]
 };
 
 const PARTY_COLORS = {
@@ -30,7 +31,8 @@ const PARTY_COLORS = {
   REP: "#3156a5", "MISSÃO": "#f2c230", AGIR: "#e66b32", PRD: "#4d6a91",
   DC: "#2855a6", PP: "#2876bd", NOVO: "#f28c28", PSB: "#e34b72",
   PSTU: "#b51f2b", PSOL: "#e3a52c", PCB: "#b82c2c",
-  "UNIÃO": "#2455a4", DEMOCRATA: "#5b6f91", PRTB: "#3156a5", PDT: "#2876bd"
+  "UNIÃO": "#2455a4", DEMOCRATA: "#5b6f91", PRTB: "#3156a5", PDT: "#2876bd",
+  PODE: "#2876bd"
 };
 
 const CANDIDATES = {
@@ -232,6 +234,14 @@ const CANDIDATES = {
     ["Delegado Marcos", "DC", "27"],
     ["Dr. Furlan", "PSD", "55"],
     ["Jairo Palheta", "PCO", "29"]
+  ],
+  PA: [
+    ["Araceli", "PSOL", "50"],
+    ["Dr. Daniel", "PODE", "20"],
+    ["Gal Leite", "UP", "80"],
+    ["Hana Ghassan", "MDB", "15"],
+    ["Ruth Reis", "DEMOCRATA", "35"],
+    ["Well Macedo", "PSTU", "16"]
   ]
 };
 

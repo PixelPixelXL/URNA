@@ -15,7 +15,10 @@ const STATES = {
   PE: ["Pernambuco", ["pernambuco", "pe"]],
   AL: ["Alagoas", ["alagoas", "al"]],
   SE: ["Sergipe", ["sergipe", "se"]],
-  ES: ["Espírito Santo", ["espirito santo", "es"]]
+  ES: ["Espírito Santo", ["espirito santo", "es"]],
+  RS: ["Rio Grande do Sul", ["rio grande do sul", "rs"]],
+  SC: ["Santa Catarina", ["santa catarina", "sc"]],
+  PR: ["Paraná", ["parana", "pr"]]
 };
 
 const PARTY_COLORS = {
@@ -173,6 +176,35 @@ const CANDIDATES = {
     ["Lorenzo Pazolini", "REP", "10"],
     ["Rafael Demuner", "UP", "80"],
     ["Ricardo Ferraço", "MDB", "15"]
+  ],
+  RS: [
+    ["Cesar Pontes", "PCO", "29"],
+    ["Gabriel Souza", "MDB", "15"],
+    ["Juliana Brizola", "PDT", "12"],
+    ["Marcelo Maranata", "PSDB", "45"],
+    ["Priscila Voigt", "UP", "80"],
+    ["Rejane de Oliveira", "PSTU", "16"],
+    ["Zucco", "PL", "22"]
+  ],
+  SC: [
+    ["Bruno Pedreiro do PCO", "PCO", "29"],
+    ["Gelson Merísio", "PSB", "40"],
+    ["João Rodrigues", "PSD", "55"],
+    ["Jorginho Mello", "PL", "22"],
+    ["Laís Chaud", "UP", "80"],
+    ["Marcelo Brigadeiro", "MISSÃO", "14"],
+    ["Professor Marcus Sodré", "PSTU", "16"],
+    ["Ralf Zimmer", "PRD", "25"]
+  ],
+  PR: [
+    ["Adriano Funileiro", "PCO", "29"],
+    ["Doutor Alexandre Salomão", "MOB", "33"],
+    ["Luiz França", "MISSÃO", "14"],
+    ["Requião Filho", "PDT", "12"],
+    ["Samuel de Mattos", "PSTU", "16"],
+    ["Sandro Alex", "PSD", "55"],
+    ["Sergio Moro", "PL", "22"],
+    ["Tayná Miessa", "UP", "80"]
   ]
 };
 

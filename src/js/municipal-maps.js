@@ -475,16 +475,16 @@ export async function renderPresidentialMunicipalMap({ candidates, parties, vote
         const recovered=await Promise.all(missing.map(async item=>{
           const response=await fetch(base+"v3/malhas/municipios/"+item.id+"?formato=application/vnd.geo+json&qualidade=minima");
           if(!response.ok)return null;
-          const feature=await response.json();
+          const payload=await response.json();
+          const feature=payload?.type==="Feature" ? payload :
+            payload?.type==="FeatureCollection" ? payload.features?.[0] : null;
           return feature?.geometry ? [String(item.id),feature.geometry] : null;
         }));
         recovered.filter(Boolean).forEach(([code,geometry])=>geometryByCode.set(code,geometry));
       }
+      const absent=names.filter(item=>!geometryByCode.has(String(item.id)));
       const features=names.filter(item=>geometryByCode.has(String(item.id)));
-      if(features.length!==names.length){
-        const absent=names.filter(item=>!geometryByCode.has(String(item.id))).map(item=>item.nome);
-        throw Error(uf+": não foi possível obter a geometria de "+absent.length+" município(s): "+absent.join(", ")+".");
-      }
+      absent.forEach(item=>console.warn("URNA: geometria municipal indisponível no IBGE:",uf,item.nome,item.id));
       return features.map(item=>({uf,code:String(item.id),name:item.nome,geometry:geometryByCode.get(String(item.id))}));
     }));
     const features=groups.flat(), results=new Map();

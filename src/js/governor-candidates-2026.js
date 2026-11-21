@@ -24,7 +24,8 @@ const STATES = {
   AP: ["Amapá", ["amapa", "ap"]],
   PA: ["Pará", ["para", "pa"]],
   RR: ["Roraima", ["roraima", "rr"]],
-  RO: ["Rondônia", ["rondonia", "ro"]]
+  RO: ["Rondônia", ["rondonia", "ro"]],
+  TO: ["Tocantins", ["tocantins", "to"]]
 };
 
 const PARTY_COLORS = {
@@ -259,6 +260,14 @@ const CANDIDATES = {
     ["Marcos Rogério", "PL", "22"],
     ["Pedro Abib", "MDB", "15"],
     ["Samuel Costa", "PSB", "40"]
+  ],
+  TO: [
+    ["Ataides de Oliveira", "NOVO", "30"],
+    ["Du Pereira", "DC", "27"],
+    ["Laurez Moreira", "PSD", "55"],
+    ["Prof. Witer Naves", "PSOL", "50"],
+    ["Professora Dorinha", "UNIÃO", "44"],
+    ["Vicentinho Júnior", "PSDB", "45"]
   ]
 };
 

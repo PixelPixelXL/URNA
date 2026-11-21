@@ -23,7 +23,8 @@ const STATES = {
   AC: ["Acre", ["acre", "ac"]],
   AP: ["Amapá", ["amapa", "ap"]],
   PA: ["Pará", ["para", "pa"]],
-  RR: ["Roraima", ["roraima", "rr"]]
+  RR: ["Roraima", ["roraima", "rr"]],
+  RO: ["Rondônia", ["rondonia", "ro"]]
 };
 
 const PARTY_COLORS = {
@@ -250,6 +251,14 @@ const CANDIDATES = {
     ["Farah Mesquita", "SD", "77"],
     ["Rosi Aires", "PSOL", "50"],
     ["Soldado Sampaio", "REP", "10"]
+  ],
+  RO: [
+    ["Adailton Fúria", "PSD", "55"],
+    ["Expedito Netto", "PT", "13"],
+    ["Hildon Chaves", "UNIÃO", "44"],
+    ["Marcos Rogério", "PL", "22"],
+    ["Pedro Abib", "MDB", "15"],
+    ["Samuel Costa", "PSB", "40"]
   ]
 };
 

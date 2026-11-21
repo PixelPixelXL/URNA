@@ -22,7 +22,8 @@ const STATES = {
   AM: ["Amazonas", ["amazonas", "am"]],
   AC: ["Acre", ["acre", "ac"]],
   AP: ["Amapá", ["amapa", "ap"]],
-  PA: ["Pará", ["para", "pa"]]
+  PA: ["Pará", ["para", "pa"]],
+  RR: ["Roraima", ["roraima", "rr"]]
 };
 
 const PARTY_COLORS = {
@@ -32,7 +33,7 @@ const PARTY_COLORS = {
   DC: "#2855a6", PP: "#2876bd", NOVO: "#f28c28", PSB: "#e34b72",
   PSTU: "#b51f2b", PSOL: "#e3a52c", PCB: "#b82c2c",
   "UNIÃO": "#2455a4", DEMOCRATA: "#5b6f91", PRTB: "#3156a5", PDT: "#2876bd",
-  PODE: "#2876bd"
+  PODE: "#2876bd", SD: "#2876bd"
 };
 
 const CANDIDATES = {
@@ -242,6 +243,13 @@ const CANDIDATES = {
     ["Hana Ghassan", "MDB", "15"],
     ["Ruth Reis", "DEMOCRATA", "35"],
     ["Well Macedo", "PSTU", "16"]
+  ],
+  RR: [
+    ["Arthur Henrique", "PL", "22"],
+    ["Clébio Genuíno", "PCO", "29"],
+    ["Farah Mesquita", "SD", "77"],
+    ["Rosi Aires", "PSOL", "50"],
+    ["Soldado Sampaio", "REP", "10"]
   ]
 };
 

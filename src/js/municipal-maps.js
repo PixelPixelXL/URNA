@@ -1,9 +1,31 @@
 const STATES = {
-  MG: { code: 31, name: "Minas Gerais", count: 853 },
-  RJ: { code: 33, name: "Rio de Janeiro", count: 92 },
-  SP: { code: 35, name: "São Paulo", count: 645 },
+  AC: { code: 12, name: "Acre", count: 22 },
+  AL: { code: 27, name: "Alagoas", count: 102 },
+  AP: { code: 16, name: "Amapá", count: 16 },
+  AM: { code: 13, name: "Amazonas", count: 62 },
   BA: { code: 29, name: "Bahia", count: 417 },
-  SE: { code: 28, name: "Sergipe", count: 75 }
+  CE: { code: 23, name: "Ceará", count: 184 },
+  DF: { code: 53, name: "Distrito Federal", count: 1 },
+  ES: { code: 32, name: "Espírito Santo", count: 78 },
+  GO: { code: 52, name: "Goiás", count: 246 },
+  MA: { code: 21, name: "Maranhão", count: 217 },
+  MT: { code: 51, name: "Mato Grosso", count: 142 },
+  MS: { code: 50, name: "Mato Grosso do Sul", count: 79 },
+  MG: { code: 31, name: "Minas Gerais", count: 853 },
+  PA: { code: 15, name: "Pará", count: 144 },
+  PB: { code: 25, name: "Paraíba", count: 223 },
+  PR: { code: 41, name: "Paraná", count: 399 },
+  PE: { code: 26, name: "Pernambuco", count: 185 },
+  PI: { code: 22, name: "Piauí", count: 224 },
+  RJ: { code: 33, name: "Rio de Janeiro", count: 92 },
+  RN: { code: 24, name: "Rio Grande do Norte", count: 167 },
+  RS: { code: 43, name: "Rio Grande do Sul", count: 497 },
+  RO: { code: 11, name: "Rondônia", count: 52 },
+  RR: { code: 14, name: "Roraima", count: 15 },
+  SC: { code: 42, name: "Santa Catarina", count: 295 },
+  SP: { code: 35, name: "São Paulo", count: 645 },
+  SE: { code: 28, name: "Sergipe", count: 75 },
+  TO: { code: 17, name: "Tocantins", count: 139 }
 };
 
 const $ = id => document.getElementById(id);
